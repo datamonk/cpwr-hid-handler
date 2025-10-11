@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 
 const vendorId = 0x0764; // Vendor ID [Cyberpower]
 const productId = 0x0501; // Product ID [SL950U]
+// Bus 003 Device 002: ID 0764:0601 Cyber Power System, Inc. PR1500LCDRT2U UPS
 const devicePath = "/dev/usb/hiddev0"; // Local device pointer
 const reportsToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
 
@@ -21,6 +22,7 @@ function parseHidData(reportId, buffer, outputObject) {
   if (buffer.length < 5) {
     return; // Ignore short or malformed reports, seems to speed up processing..
   };
+
   switch (reportId) {
     case '0x66':
       const remainingCapacity = buffer.readUInt16LE(4); // Bytes 4-5
@@ -55,8 +57,8 @@ function parseHidData(reportId, buffer, outputObject) {
       outputObject.chargerStatus = chargerStatus;
 
       /** Via synchronous read(s), this is the last report id we are going to 
-       * parse data from so add a timestamp to the output object and  signal 
-       * our custom emitter that we are done. This will ensure we have final 
+       * parse data from so add a timestamp to the output object and signal 
+       * our emitter that we are done. This will ensure we have the final 
        * complete data object before returning it downstream.
        */
       outputObject.timestamp = new Date().toISOString();
@@ -86,6 +88,12 @@ function startUpsHandler() {
         if (reportIdHex === '0xd0') {
           doneEmitter.once('done', () => {
             console.log('Final JSON object:', JSON.stringify(reportData, null, 2));
+            
+            // @todo: Decide to hold the connection open or close it after a single 
+            //        read cycle.
+            // upsDevice.close();
+            // console.log('Closed device after read cycle.');
+
             // Reset reportData for next read cycle
             for (const key in reportData) {
               if (reportData.hasOwnProperty(key)) {
@@ -103,7 +111,7 @@ function startUpsHandler() {
       if (upsDevice) {
         upsDevice.close();
       };
-      setTimeout(startUpsHandler, 5000); // Attempt to reconnect after a delay
+      setTimeout(startUpsHandler, 5000);
     });
 
     process.on('SIGINT', () => {
