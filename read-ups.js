@@ -1,15 +1,21 @@
 const HID = require('node-hid');
 const EventEmitter = require('events');
 
-const vendorId = 0x0764; // Vendor ID [Cyberpower]
-const productId = 0x0501; // Product ID [SL950U]
-// Bus 003 Device 002: ID 0764:0601 Cyber Power System, Inc. PR1500LCDRT2U UPS
-const devicePath = "/dev/usb/hiddev0"; // Local device pointer
-const reportsToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
-
-const reportData = {}; // Init JSON obj for parsed report data
 const doneEmitter = new EventEmitter(); // Event emitter to signal when parsing is done
 let upsDevice; // HID device instance
+const reportData = {}; // Init JSON obj for parsed report data
+
+/** @globals */
+// Vendor and Product IDs for the CyberPower SL950U UPS
+const vendorId = 0x0764; // Vendor ID [Cyberpower]
+const productId = 0x0501; // Product ID [SL950U]
+// Vendor and Product IDs for the CyberPower PR1500LCDRT2U UPS
+//const vendorId = 0x0764; // Vendor ID [Cyberpower]
+//const productId = 0x0601; // Product ID [PR1500LCDRT2U]
+
+const devicePath = "/dev/usb/hiddev0"; // Local device pointer
+const reportsToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
+/***/
 
 /**
  * Parses the raw HID data buffer from the UPS.
@@ -64,8 +70,7 @@ function parseHidData(reportId, buffer, outputObject) {
       outputObject.timestamp = new Date().toISOString();
       doneEmitter.emit('done');
       break;
-    default:
-      break; // Skip all other ids
+    default: break; // Skip all other ids
   };
 };
 
@@ -91,15 +96,15 @@ function startUpsHandler() {
             
             // @todo: Decide to hold the connection open or close it after a single 
             //        read cycle.
-            // upsDevice.close();
-            // console.log('Closed device after read cycle.');
+            upsDevice.close();
+            console.log('Closed device after single read cycle.');
 
             // Reset reportData for next read cycle
-            for (const key in reportData) {
-              if (reportData.hasOwnProperty(key)) {
-                delete reportData[key];
-              };
-            };
+            //for (const key in reportData) {
+            //  if (reportData.hasOwnProperty(key)) {
+            //    delete reportData[key];
+            //  };
+            //};
 
           });
         };
