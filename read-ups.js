@@ -1,16 +1,23 @@
 const HID = require('node-hid');
 const EventEmitter = require('events');
 
-const vendorId = 0x0764; // Replace with your device's Vendor ID
-const productId = 0x0501; // Replace with your device's Product ID
+const vendorId = 0x0764; // Vendor ID [Cyberpower]
+const productId = 0x0501; // Product ID [SL950U]
 const devicePath = "/dev/usb/hiddev0"; // Local device pointer
 const reportsToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
 
-const doneEmitter = new EventEmitter(); // Event emitter to signal when parsing is done
 const reportData = {}; // Init JSON obj for parsed report data
+const doneEmitter = new EventEmitter(); // Event emitter to signal when parsing is done
 let upsDevice; // HID device instance
 
-function parseHidReport(reportId, buffer, outputObject) {
+/**
+ * Parses the raw HID data buffer from the UPS.
+ * @param {string} reportId - The report ID in hex string format (e.g., '0x66').
+ * @param {buffer} data - The raw data buffer from the HID device.
+ * @param {object} outputObject - The object to store parsed data.
+ * @returns {object} - An object with the parsed UPS data.
+ */
+function parseHidData(reportId, buffer, outputObject) {
   if (buffer.length < 5) {
     return; // Ignore short or malformed reports, seems to speed up processing..
   };
@@ -47,39 +54,47 @@ function parseHidReport(reportId, buffer, outputObject) {
       outputObject.acPresent = acPresent;
       outputObject.chargerStatus = chargerStatus;
 
-      // Via synchronous read(s), we know this is the last report id we are
-      // going to parse data from so add a timestamp to the output object and 
-      // signal our custom emitter that we are done. This will ensure
-      // we have final complete data object before returning it downstream.
+      /** Via synchronous read(s), this is the last report id we are going to 
+       * parse data from so add a timestamp to the output object and  signal 
+       * our custom emitter that we are done. This will ensure we have final 
+       * complete data object before returning it downstream.
+       */
       outputObject.timestamp = new Date().toISOString();
       doneEmitter.emit('done');
       break;
     default:
-      break; // Skip ids we don't care about
+      break; // Skip all other ids
   };
 };
 
+/**
+ * Kickoff the HID event handler for reading from the UPS device.
+ */
 function startUpsHandler() {
   console.log('Starting UPS HID handler...');
   try {
     upsDevice = new HID.HID(devicePath);
-    //console.log(`Opened device: ${targetDevice.product}`);
     console.log(`Opened device: ${devicePath}`);
     console.log('Listening for data... Press Ctrl+C to exit.');
 
     upsDevice.on('data', function (data) {
       const reportId = data[0];
       const reportIdHex = `0x${reportId.toString(16).padStart(2, '0')}`;
-      //console.log(`Received report ID: ${reportIdHex}, Data:`, data);
-      if (reportsToParse.includes(reportIdHex)) {
-        parseHidReport(reportIdHex, data, reportData);
 
+      if (reportsToParse.includes(reportIdHex)) {
+        parseHidData(reportIdHex, data, reportData);
         if (reportIdHex === '0xd0') {
           doneEmitter.once('done', () => {
             console.log('Final JSON object:', JSON.stringify(reportData, null, 2));
+            // Reset reportData for next read cycle
+            for (const key in reportData) {
+              if (reportData.hasOwnProperty(key)) {
+                delete reportData[key];
+              };
+            };
+
           });
         };
-        //console.log('Updated JSON object:', JSON.stringify(reportData, null, 2));
       };
     });
 
@@ -100,7 +115,7 @@ function startUpsHandler() {
   } catch (err) {
     console.error('Failed to open HID device:', err.message);
     console.error('Make sure the UPS is connected and you have permissions (e.g., udev rules on Linux).');
-    setTimeout(startUpsHandler, 5000); // Attempt to reconnect
+    setTimeout(startUpsHandler, 5000);
   };
 };
 
