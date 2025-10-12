@@ -91,7 +91,7 @@ function parseHidData(usageId, buffer, output) {
       output.acPresent = acPresent;
       output.chargeStatus = chargeStatus;
 
-      /** Since this is a synchronous read, we can lean safely assume this is the last id
+      /** Since this is a synchronous read, we can safely assume this is the last id
        * we are going to parse data from. Add timestamp, devicePath to the output object
        * and signal a done state to the emitter. Ensuring a complete data object is gtg.
        */
