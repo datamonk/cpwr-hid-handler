@@ -20,31 +20,40 @@ const keyOrder = ['ts', 'path', 'batteryPercentage', 'acPresent', 'runTimeToEmpt
 /***/
 
 const userArgs = process.argv.slice(2);
-// Simple arg parser for --device or -d flag to specify device path
 for (let i = 0; i < userArgs.length; i++) {
-  if (userArgs[i] === '--mode' || userArgs[i] === '-m') {
+  if (userArgs[i] === '--verbose' || userArgs[i] === '-v') {
+    var verboseEnabled = true;
+    if (verboseEnabled) {
+      logVerbose('Verbose mode enabled.');
+    };
+  } else if (userArgs[i] === '--mode' || userArgs[i] === '-m') {
     if (i + 1 < userArgs.length) {
       const mode = userArgs[i + 1].toLowerCase();
       var onceModeEnabled = false;
       if (mode === 'once') {
-        console.warn('Setting runtime mode to once. The script will exit after a single read cycle.');
+        //console.warn('Setting runtime mode to once. The script will exit after a single read cycle.');
         onceModeEnabled = true;
       } else if (mode === 'stream') {
-        console.warn('Setting runtime mode to stream. The script will continue running and reading data.');
-        //onceModeEnabled = false;
+        //console.warn('Setting runtime mode to stream. The script will continue running and reading data.');
       } else {
         console.error('Invalid mode. Use "once" or "stream".');
         process.exit(1);
-      }
+      };
     } else {
       console.error('No mode provided after --mode or -m flag.');
       process.exit(1);
-    }
+    };
   } else if (userArgs[i] === '--help' || userArgs[i] === '-h') {
-    console.log('Usage: node read-ups.js [--mode <once|stream>]');
+    console.log('Usage: node read-ups.js [--mode <once|stream>] [--verbose]');
     process.exit(0);
-  }
-}
+  };
+};
+
+function logVerbose(...messages) {
+  if (verboseEnabled) {
+    console.log('[VERBOSE]', ...messages);
+  };
+};
 
 /**
  * Parses the raw HID data buffer from the UPS.
@@ -61,7 +70,6 @@ function parseHidData(usageId, buffer, output) {
   switch (usageId) {
     case '0x66':
       const remainingCapacity = buffer.readUInt16LE(4); // Bytes 4-5
-
       output.batteryPercentage = remainingCapacity;
       break;
     case '0x68':
@@ -71,7 +79,6 @@ function parseHidData(usageId, buffer, output) {
        */
       const runTimeSec = buffer.readUInt16LE(4); // Bytes 4-5
       const runTimeMin = Math.floor(runTimeSec / 60); // convert to min
-
       output.runTimeToEmpty = runTimeMin;
       break;
     case '0xd0':
@@ -88,9 +95,9 @@ function parseHidData(usageId, buffer, output) {
       } else if (fullyCharged && acPresent && !charging && !discharging) {
         chargeStatus = "fully-charged"; // State when on AC power and fully charged
       };
+
       output.acPresent = acPresent;
       output.chargeStatus = chargeStatus;
-
       /** Since this is a synchronous read, we can safely assume this is the last id
        * we are going to parse data from. Add timestamp, devicePath to the output object
        * and signal a done state to the emitter. Ensuring a complete data object is gtg.
@@ -107,11 +114,12 @@ function parseHidData(usageId, buffer, output) {
  * Kickoff the HID event handler for reading from the UPS device.
  */
 function startUpsHandler() {
-  //console.log('Starting UPS HID handler...');
+  logVerbose('Starting UPS HID handler...');
+  logVerbose(`Looking for device with Vendor ID 0x${vendorId.toString(16)} and Product ID 0x${productId.toString(16)}...`);
   try {
     ups = new HID.HID(devicePath);
-    //console.log(`Opened device: ${devicePath}`);
-    //console.log('Listening for data... Press Ctrl+C to exit.');
+    logVerbose(`Opened device: ${devicePath}`);
+    logVerbose('Listening for data... Press Ctrl+C to exit.');
 
     ups.on('data', function (data) {
       const reportId = data[0];
@@ -141,8 +149,11 @@ function startUpsHandler() {
                }
              */
             if (onceModeEnabled) {
-              ups.close();
-              //console.log('Closed device after single read cycle.');
+              logVerbose('Closed device after single read cycle.');
+              if (ups) {
+                ups.close();
+              };
+              process.exit(0);
             } else {
               // Reset reportData for next read cycle
               for (const key in reportData) {
@@ -165,7 +176,7 @@ function startUpsHandler() {
     });
 
     process.on('SIGINT', () => {
-      console.log('\nClosing device and exiting.');
+      logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
       ups.close();
       process.exit();
     });
