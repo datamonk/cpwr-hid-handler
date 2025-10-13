@@ -14,11 +14,11 @@ _wai="$(_wai)"; _pn="${0##*/}";
 exec_njs(){
   # Only grab filename from the first arg to reset path context 
   # from this bin directory.
-  local jsf; jsf="$(basename "$1")"; shift;
-  if [[ ! -f "${jsf}" ]]; then
-    echo "Error: JavaScript file '${jsf}' not found."; return 1;
+  local scr; scr="$(basename "$1")"; shift;
+  if [[ ! -f "${scr}" ]]; then
+    echo "Error: JavaScript file '${scr}' not found."; return 1;
   fi
-  $(type -p node) "${_wai}/../${jsf}" "$@"; return $?;
+  $(type -p node) "${_wai}/../${scr}" "$@"; return $?;
 };
 # @usage: exec_njs "./read-ups.js" "--mode" "once" "--verbose"
 # @output:
