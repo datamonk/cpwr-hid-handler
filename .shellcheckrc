@@ -1,0 +1,11 @@
+shell=bash
+enable=all
+color=auto
+severity=style
+# SC2312 = Don't warn for consideration to invoke command 
+#          seperately to avoid masking return value.
+# SC2059 = Don't warn for use of variables in the printf 
+#          format string.
+disable=SC2312,SC2059
+external-sources=true
+check-sourced=true
