@@ -1,5 +1,7 @@
 const HID = require('node-hid');
 const EventEmitter = require('events');
+const colors = require('yoctocolors'); // @ref: https://github.com/sindresorhus/yoctocolors#readme
+//console.log(colors.bgRedBright('Test'));
 
 /** @globals */
 // Vendor and Product IDs for the CyberPower SL950U UPS
@@ -26,6 +28,11 @@ for (let i = 0; i < userArgs.length; i++) {
     if (verboseEnabled) {
       logVerbose('Verbose mode enabled.');
     };
+  } else if (userArgs[i] === '--report' || userArgs[i] === '-r') {
+    var reportEnabled = true;
+    if (reportEnabled) {
+      logVerbose('Report descriptors selected.');
+    };
   } else if (userArgs[i] === '--mode' || userArgs[i] === '-m') {
     if (i + 1 < userArgs.length) {
       const mode = userArgs[i + 1].toLowerCase();
@@ -51,8 +58,47 @@ for (let i = 0; i < userArgs.length; i++) {
 
 function logVerbose(...messages) {
   if (verboseEnabled) {
-    console.log('[VERBOSE]', ...messages);
+    console.log(colors.bgWhiteBright('[VERBOSE]'), ...messages);
   };
+};
+
+function dumpDescriptors() {
+  const getFeatureReport = (reportId, reportLength) => {
+    try {
+      ups = new HID.HID(devicePath);
+      const report = ups.getFeatureReport(reportId, reportLength);
+      console.log(`Feature report ${reportId}:`, report);
+      // You will need to parse this report buffer based on the descriptor
+      // For example, convert a hex report to a string
+      const reportAsString = report.toString('utf-8').trim();
+      console.log(`Parsed string:`, reportAsString);
+    } catch (err) {
+      console.error(`Error reading feature report ${reportId}:`, err);
+    };
+  };
+
+  const readInputReports = () => {
+    ups.on('data', (data) => {
+      console.log('Received input report:', data);
+      // @todo: Inject done emitter event when last expected usageId
+      //        for a single iteration is seen to close the connection
+      //        gracefully.
+    });
+    ups.on('error', (err) => {
+      console.error('HID device error:', err);
+      if (ups) {
+        ups.close();
+      };
+    });
+    process.on('SIGINT', () => {
+      logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
+      ups.close();
+      process.exit();
+    });
+  };
+
+  getFeatureReport(1, 64);
+  readInputReports();
 };
 
 /**
@@ -166,7 +212,6 @@ function startUpsHandler() {
         };
       };
     });
-
     ups.on('error', function (err) {
       console.error('HID device error:', err);
       if (ups) {
@@ -174,7 +219,6 @@ function startUpsHandler() {
       };
       setTimeout(startUpsHandler, 5000);
     });
-
     process.on('SIGINT', () => {
       logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
       ups.close();
@@ -188,8 +232,10 @@ function startUpsHandler() {
   };
 };
 
-if (devicePath) {
+if (devicePath && !reportEnabled) {
   startUpsHandler();
+} else if (reportEnabled) {
+  dumpDescriptors();
 } else {
   console.error(`Device with Vendor ID 0x${vendorId.toString(16)} and Product ID 0x${productId.toString(16)} not found.`);
   process.exit(1);
