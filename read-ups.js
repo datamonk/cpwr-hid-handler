@@ -1,7 +1,6 @@
 const HID = require('node-hid');
 const EventEmitter = require('events');
 const colors = require('yoctocolors'); // @ref: https://github.com/sindresorhus/yoctocolors#readme
-//console.log(colors.bgRedBright('Test'));
 
 /** @globals */
 // Vendor and Product IDs for the CyberPower SL950U UPS
@@ -14,10 +13,10 @@ const productId = 0x0501; // Product ID [SL950U]
 const devicePath = "/dev/usb/hiddev0"; // Local device pointer
 const usagesToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
 
-const ee = new EventEmitter(); // Event emitter to signal state of parsing lifecycle
-let ups; // HID device instance
-const reportData = {}; // Init JSON obj for parsed report data
-// Desired key order for final output
+const ee = new EventEmitter(); // Event emitter instance to signal state of parsing lifecycle
+let ups; let upsWithIds; // HID device i/o instance [path and ids invoke types]
+const reportData = {}; // Init JSON object for parsed report data
+// Set static order for JSON object elements
 const keyOrder = ['ts', 'path', 'batteryPercentage', 'acPresent', 'runTimeToEmpty', 'chargeStatus'];
 /***/
 
@@ -38,10 +37,9 @@ for (let i = 0; i < userArgs.length; i++) {
       const mode = userArgs[i + 1].toLowerCase();
       var onceModeEnabled = false;
       if (mode === 'once') {
-        //console.warn('Setting runtime mode to once. The script will exit after a single read cycle.');
         onceModeEnabled = true;
       } else if (mode === 'stream') {
-        //console.warn('Setting runtime mode to stream. The script will continue running and reading data.');
+        // noop
       } else {
         console.error('Invalid mode. Use "once" or "stream".');
         process.exit(1);
@@ -62,14 +60,31 @@ function logVerbose(...messages) {
   };
 };
 
+var JSONstringifyHex = function(arr) {
+  var str='[';
+  for (var i = 0; i < arr.length-1; i++) {
+      str += '0x' + arr[i].toString(16)
+      if(i<arr.length-2) { str+=','; }
+  }
+  str += ']';
+  return str;
+};
+
 function dumpDescriptors() {
+ /**
+  * @note When using 'device.getFeatureReport()', avoid invoking the HID instance
+  *       with the devicePath method. It seems that type evaluation for (reportId,
+  *       reportLength) are implemented differently and I wasn't able to get a clean
+  *       report iteration without throwing type errors. Once I switched the invoke
+  *       method to (vendorId, productId), worked with no issue.. 
+  */
+  upsWithIds = new HID.HID(vendorId, productId);
+
   const getFeatureReport = (reportId, reportLength) => {
     try {
-      ups = new HID.HID(devicePath);
-      const report = ups.getFeatureReport(reportId, reportLength);
+      var report = upsWithIds.getFeatureReport(reportId, reportLength);
       console.log(`Feature report ${reportId}:`, report);
-      // You will need to parse this report buffer based on the descriptor
-      // For example, convert a hex report to a string
+
       const reportAsString = report.toString('utf-8').trim();
       console.log(`Parsed string:`, reportAsString);
     } catch (err) {
@@ -78,37 +93,40 @@ function dumpDescriptors() {
   };
 
   const readInputReports = () => {
-    ups.on('data', (data) => {
-      console.log('Received input report:', data);
-      // @todo: Inject done emitter event when last expected usageId
-      //        for a single iteration is seen to close the connection
-      //        gracefully.
+    upsWithIds.on('data', function (data) {
+      console.log('Received input report Buffer:', data);
+      console.log('Received input report Hex:' + JSONstringifyHex(data));
+      /** 
+       * @todo Inject done emitter event when last expected usageId
+       *       for a single iteration is seen to close the connection
+       *       gracefully.
+       */
+      getFeatureReport(data[0], 64);
     });
-    ups.on('error', (err) => {
+    upsWithIds.on('error', function (err) {
       console.error('HID device error:', err);
-      if (ups) {
-        ups.close();
+      if (upsWithIds) {
+        upsWithIds.close();
       };
     });
     process.on('SIGINT', () => {
       logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
-      ups.close();
+      upsWithIds.close();
       process.exit();
     });
   };
 
-  getFeatureReport(1, 64);
   readInputReports();
 };
 
-/**
- * Parses the raw HID data buffer from the UPS.
- * @param {string} usageId - The report/usage ID in hex string format (e.g., '0x66').
- * @param {buffer} data - The raw data buffer from the HID device.
- * @param {object} output - The object to store parsed data.
- * @returns {object} - An object with the parsed UPS data.
- */
 function parseHidData(usageId, buffer, output) {
+ /**
+  * Parses the raw HID data buffer from the UPS.
+  * @param {string} usageId - The report/usage ID in hex string format (e.g., '0x66').
+  * @param {buffer} data - The raw data buffer from the HID device.
+  * @param {object} output - The object to store parsed data.
+  * @returns {object} - An object with the parsed UPS data.
+  */
   if (buffer.length < 5) {
     return; // Ignore short or malformed reports, seems to speed up processing..
   };
@@ -119,10 +137,11 @@ function parseHidData(usageId, buffer, output) {
       output.batteryPercentage = remainingCapacity;
       break;
     case '0x68':
-      /** hut1.6 usage desc states 'Run Time to Empty' unit is in minutes..but its 
-       * actually seconds. So we need to convert it to min here.
-       * @ref: https://usb.org/sites/default/files/hut1_6.pdf#page=386&zoom=100,57,57
-       */
+     /** 
+      * @note hut1.6 usage desc states 'Run Time to Empty' unit is in minutes..but its 
+      *       actually seconds. So we need to convert it to min here.
+      * @ref  https://usb.org/sites/default/files/hut1_6.pdf#page=386&zoom=100,57,57
+      */
       const runTimeSec = buffer.readUInt16LE(4); // Bytes 4-5
       const runTimeMin = Math.floor(runTimeSec / 60); // convert to min
       output.runTimeToEmpty = runTimeMin;
@@ -144,9 +163,10 @@ function parseHidData(usageId, buffer, output) {
 
       output.acPresent = acPresent;
       output.chargeStatus = chargeStatus;
-      /** Since this is a synchronous read, we can safely assume this is the last id
-       * we are going to parse data from. Add timestamp, devicePath to the output object
-       * and signal a done state to the emitter. Ensuring a complete data object is gtg.
+      /** 
+       * @note Since this is a synchronous read, we can safely assume this is the last id
+       *       we are going to parse data from. Add timestamp, devicePath to the output object
+       *       and signal a done state to the emitter. Ensuring a complete data object is gtg.
        */
       output.ts = new Date().toISOString();
       output.path = devicePath;
@@ -156,10 +176,10 @@ function parseHidData(usageId, buffer, output) {
   };
 };
 
-/**
- * Kickoff the HID event handler for reading from the UPS device.
- */
 function startUpsHandler() {
+ /**
+  * @desc Kickoff the main HID event read handler
+  */
   logVerbose('Starting UPS HID handler...');
   logVerbose(`Looking for device with Vendor ID 0x${vendorId.toString(16)} and Product ID 0x${productId.toString(16)}...`);
   try {
@@ -184,7 +204,7 @@ function startUpsHandler() {
             const orderedReportData = Object.fromEntries(entries);
             console.log(JSON.stringify(orderedReportData, null, 2));
             /**
-             * @output:
+             * @output
              * {
                  "ts": "2025-10-12T03:19:11.546Z",
                  "path": "/dev/usb/hiddev0",
@@ -201,10 +221,9 @@ function startUpsHandler() {
               };
               process.exit(0);
             } else {
-              // Reset reportData for next read cycle
               for (const key in reportData) {
                 if (reportData.hasOwnProperty(key)) {
-                  delete reportData[key];
+                  delete reportData[key]; // Reset reportData for next read cycle
                 };
               };
             };
