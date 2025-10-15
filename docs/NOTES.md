@@ -1,6 +1,8 @@
 ### HID Parsing Notes
 
 ```bash
+# @ref: https://github.com/kastaniotis/Sups/blob/master/Sups/src/Sensor/HIDUpsSensor.cs
+
 ./sups --debug --port /dev/usb/hiddev0 --pretty-json
 Logging is now: True
 Json is now: False
