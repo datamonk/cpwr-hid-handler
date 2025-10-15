@@ -46,15 +46,23 @@ $ ./bin/read-ups --mode once --verbose
 
 ## Deployment
 
-### Bootstrap
+### Standalone Install
 
 ```bash
-# Install NodeJS locally if needed
-$ ./utils/bootstrap.sh 
-
 $ git clone https://github.com/datamonk/cpwr-hid-handler.git \
-    && cd cpwr-hid-handler/ \
-    && npm install; # installs 'node-hid yoctocolors' modules
+    && cd cpwr-hid-handler/
+
+# Run bootstrap:
+#   - Installs NodeJS locally if binaries not in $PATH
+#   - Installs the required package.json modules within
+#     the project directory.
+$ ./utils/bootstrap.sh 
+```
+
+### Submodule Integration
+
+```bash
+TODO
 ```
 
 ### Setting udev rules for non-sudo exec
