@@ -95,13 +95,15 @@ function dumpDescriptors() {
   const readInputReports = () => {
     upsWithIds.on('data', function (data) {
       console.log('Received input report Buffer:', data);
-      console.log('Received input report Hex:' + JSONstringifyHex(data));
+      //console.log('Received input report Hex:' + JSONstringifyHex(data));
       /** 
        * @todo Inject done emitter event when last expected usageId
        *       for a single iteration is seen to close the connection
        *       gracefully.
        */
       getFeatureReport(data[0], 64);
+      //getFeatureReport(1, 64);
+      //getFeatureReport(1, 8+1);
     });
     upsWithIds.on('error', function (err) {
       console.error('HID device error:', err);
