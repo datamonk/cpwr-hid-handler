@@ -58,6 +58,11 @@ inst_nodejs(){
     && npm -v \
     && npx -v \
     && nvm --version;
+  if [[ $? -ne 0 ]]; then
+    echo "Error installing Node.js version ${node_ver}."; exit 1;
+  fi
+  source "$HOME/.bashrc"; # re-source env with new export includes
+  return 0;
 };
 
 inst_node_modules(){
