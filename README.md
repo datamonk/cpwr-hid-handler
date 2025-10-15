@@ -21,10 +21,10 @@ Development and testing was performed directly against the following `Cyber Powe
 
 ```bash
 # opts
-./bin/read-ups --mode [once|stream] [--report] [--verbose]
+$ ./bin/read-ups --mode [once|stream] [--report] [--verbose]
 
 # example
-./bin/read-ups --mode once --verbose
+$ ./bin/read-ups --mode once --verbose
 
 # ----- Running [read-ups.js] at Mon 13 Oct 2025 11:28:36 AM EDT -----
 #
@@ -49,21 +49,22 @@ Development and testing was performed directly against the following `Cyber Powe
 ### Bootstrap
 
 ```bash
-git clone https://github.com/datamonk/cpwr-hid-handler.git \
- && cd cpwr-hid-handler/
+# Install NodeJS locally if needed
+$ ./utils/bootstrap.sh 
 
-# installs 'node-hid yoctocolors' modules
-npm install
+$ git clone https://github.com/datamonk/cpwr-hid-handler.git \
+    && cd cpwr-hid-handler/ \
+    && npm install; # installs 'node-hid yoctocolors' modules
 ```
 
 ### Setting udev rules for non-sudo exec
 
 ```bash
 # Identify device product & vendor ids if not done so already.
-./utils/find_hid_ids.sh "Cyber Power"
+$ ./utils/find_hid_ids.sh "Cyber Power"
 
 # Create new udev rule file
-sudo vim /etc/udev/rules.d/99-ups-hid.rules
+$ sudo vim /etc/udev/rules.d/99-ups-hid.rules
 
 ## Paste the below block
 SUBSYSTEM=="input", GROUP="input", MODE="0666"
@@ -73,10 +74,11 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="0764", ATTRS{idProduct}=="0501", MODE="0666
 ## :wq
 
 # Propagate changes
-sudo udevadm control --reload-rules && sudo udevadm trigger
+$ sudo udevadm control --reload-rules \
+    && sudo udevadm trigger
 
 # Confirm matching perms and group
-find /dev -regex '.*hid.*' -type c -group plugdev -exec ls -la {} +
+$ find /dev -regex '.*hid.*' -type c -group plugdev -exec ls -la {} +
 
 #  crw-rw-rw- 1 root plugdev 239, 1 Oct 10 12:57 /dev/hidraw1
 #  crw-rw-rw- 1 root plugdev 180, 0 Oct 10 12:57 /dev/usb/hiddev0
