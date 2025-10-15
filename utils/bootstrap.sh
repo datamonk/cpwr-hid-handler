@@ -68,23 +68,14 @@ inst_nodejs(){
 inst_node_modules(){
   local ret;
   cd "${_wai}/../" || exit 1;
-  #declare -a modarr=(
-  #  "node-hid" "yoctocolors"
-  #);
-  #for m in ${!modarr[*]}; do
-    #if ! npm list --depth=0 "${modarr[$m]}" >/dev/null 2>&1; then
     if ! npm list --depth=0 "node-hid" "yoctocolors" >/dev/null 2>&1; then
-      #echo "installing npm module [${modarr[$m]}]";
-      #npm install -g "${modarr[$m]}" >/dev/null; ret=$?;
       echo "installing npm modules from package.json";
       npm install >/dev/null; ret=$?;
       if [[ ${ret} -ne 0 ]]; then
-        #echo "npm install for module [${modarr[$m]}] returned [${ret}]"; exit 1;
         echo "npm install for modules returned [${ret}]";
         exit 1;
       fi
     fi
-  #done
   return 0;
 };
 
