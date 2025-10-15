@@ -62,6 +62,7 @@ inst_nodejs(){
 
 inst_node_modules(){
   local ret;
+  cd "${_wai}/../" || exit 1;
   #declare -a modarr=(
   #  "node-hid" "yoctocolors"
   #);
