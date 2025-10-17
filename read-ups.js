@@ -2,6 +2,35 @@ const HID = require('node-hid');
 const EventEmitter = require('events');
 const colors = require('yoctocolors'); // @ref: https://github.com/sindresorhus/yoctocolors#readme
 
+//const createDataProcessor = require('./lib/data-processor.js');
+//const processor = createDataProcessor();
+
+/*
+// Custom event emitter instance
+processor.on('data', (chunk) => {
+  console.log(`Received new chunk of data: ${chunk.length} bytes.`);
+});
+
+processor.on('complete', (fullBuffer) => {
+  console.log('All data has been processed.');
+  console.log(`Final buffer size: ${fullBuffer.length} bytes.`);
+  // For demonstration, convert the buffer back to a string
+  console.log(`Final data: ${fullBuffer.toString('utf8')}`);
+});
+
+processor.on('end', () => {
+  console.log('--- Processing finished. ---');
+});
+
+processor.on('warning', (message) => {
+  console.warn(`WARNING: ${message}`);
+});
+
+processor.on('error', (err) => {
+  console.error(`ERROR: ${err.message}`);
+});
+*/
+
 /** @globals */
 // Vendor and Product IDs for the CyberPower SL950U UPS
 const vendorId = 0x0764; // Vendor ID [Cyberpower]
@@ -14,6 +43,7 @@ const devicePath = "/dev/usb/hiddev0"; // Local device pointer
 const usagesToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
 
 const ee = new EventEmitter(); // Event emitter instance to signal state of parsing lifecycle
+
 let ups; let upsWithIds; // HID device i/o instance [path and ids invoke types]
 const reportData = {}; // Init JSON object for parsed report data
 // Set static order for JSON object elements
@@ -157,10 +187,14 @@ function parseHidData(usageId, buffer, output) {
 
       if (charging && acPresent && !discharging && !fullyCharged) {
         chargeStatus = "charging"; // State when on AC power and charging
+        console.log('Charging state detected.');
       } else if (discharging && !charging && !fullyCharged) {
         chargeStatus = "discharging"; // State when on battery and discharging
-      } else if (fullyCharged && acPresent && !charging && !discharging) {
+        console.log('Discharging state detected.');
+      //} else if (fullyCharged && acPresent && !charging && !discharging) {
+      } else if (fullyCharged && !charging && !discharging) {
         chargeStatus = "fully-charged"; // State when on AC power and fully charged
+        console.log('Fully charged state detected.');
       };
 
       output.acPresent = acPresent;
