@@ -45,6 +45,8 @@ const usagesToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
 const ee = new EventEmitter(); // Event emitter instance to signal state of parsing lifecycle
 
 let ups; let upsWithIds; // HID device i/o instance [path and ids invoke types]
+let chargeStatus = "undefined";
+
 const reportData = {}; // Init JSON object for parsed report data
 // Set static order for JSON object elements
 const keyOrder = ['ts', 'path', 'batteryPercentage', 'acPresent', 'runTimeToEmpty', 'chargeStatus'];
@@ -183,7 +185,7 @@ function parseHidData(usageId, buffer, output) {
       const charging = (buffer[12] & 0b00000001) !== 0;
       const discharging = (buffer[20] & 0b00000001) !== 0;
       const fullyCharged = (buffer[28] & 0b00000001) !== 0;
-      let chargeStatus = "undefined";
+      chargeStatus = "undefined";
 
       if (charging && acPresent && !discharging && !fullyCharged) {
         chargeStatus = "charging"; // State when on AC power and charging
@@ -272,7 +274,7 @@ function startUpsHandler() {
       if (ups) {
         ups.close();
       };
-      setTimeout(startUpsHandler, 5000);
+      //setTimeout(startUpsHandler, 5000);
     });
     process.on('SIGINT', () => {
       logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
@@ -283,7 +285,7 @@ function startUpsHandler() {
   } catch (err) {
     console.error('Failed to open HID device:', err.message);
     console.error('Make sure the UPS is connected and you have permissions (e.g., udev rules on Linux).');
-    setTimeout(startUpsHandler, 5000);
+    //setTimeout(startUpsHandler, 5000);
   };
 };
 
