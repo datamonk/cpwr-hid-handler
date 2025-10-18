@@ -40,12 +40,17 @@ const productId = 0x0501; // Product ID [SL950U]
 //const productId = 0x0601; // Product ID [PR1500LCDRT2U]
 
 const devicePath = "/dev/usb/hiddev0"; // Local device pointer
-const usagesToParse = ['0x66', '0x68', '0xd0']; // Report/Usage IDs to parse
+const usagesToParse = ['0x66', '0x68', '0xd0', '0x44', '0x45', '0x46']; // Report/Usage IDs to parse
 
 const ee = new EventEmitter(); // Event emitter instance to signal state of parsing lifecycle
 
 let ups; let upsWithIds; // HID device i/o instance [path and ids invoke types]
-let chargeStatus = "undefined";
+//let chargeStatus = "undefined";
+
+let acPresent = false;
+let charging = false;
+let discharging = false;
+let fullyCharged = false;
 
 const reportData = {}; // Init JSON object for parsed report data
 // Set static order for JSON object elements
@@ -92,15 +97,71 @@ function logVerbose(...messages) {
   };
 };
 
+function splitBufferIntoChunks(buffer, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < buffer.length; i += chunkSize) {
+    chunks.push(buffer.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+var JSONstringifyRaw = function(arr) {
+  var str='<Buffer ';
+  for (var i = 0; i < arr.length-1; i++) {
+    str += arr[i].toString(16).padStart(2, '0');
+    if(i<arr.length-2) { str+=' '; }
+  }
+  str += '>';
+  return str;
+};
+
 var JSONstringifyHex = function(arr) {
   var str='[';
   for (var i = 0; i < arr.length-1; i++) {
-      str += '0x' + arr[i].toString(16)
-      if(i<arr.length-2) { str+=','; }
+    str += '0x' + arr[i].toString(16).padStart(2, '0');
+    if(i<arr.length-2) { str+=', '; }
   }
   str += ']';
   return str;
 };
+
+function evaluateBooleans(acPresent, charging, discharging, fullyCharged) {
+
+  //let chargeStatus = "undefined";
+  let chargeStatus;
+
+  const states = {
+    acPresent: acPresent,
+    charging: charging,
+    discharging: discharging,
+    fullyCharged: fullyCharged
+  };
+
+  console.log('Evaluating states:', states);
+  if (fullyCharged && acPresent) {
+    console.log('The device is fully charged and AC power is present.');
+    //return 'Device is fully charged with AC power.';
+    chargeStatus = "fully-charged";
+    return chargeStatus;
+  } else if (charging && acPresent) {
+    console.log('The device is charging and AC power is present.');
+    //return 'Device is charging with AC power.';
+    chargeStatus = "charging";
+    return chargeStatus;
+  } else if (discharging && !acPresent) {
+    console.log('The device is discharging and AC power is not present.');
+    //return 'Device is discharging without AC power.';
+    chargeStatus = "discharging";
+    return chargeStatus;
+  } else {
+    // Catch-all for remaining states
+    console.log('Cannot determine the device status based on the provided booleans.');
+    //return 'Cannot determine status.';
+    chargeStatus = "undefined";
+    return chargeStatus;
+  };
+};
+//console.log(evaluateBooleans(true, false, false, true));
 
 function dumpDescriptors() {
  /**
@@ -161,6 +222,13 @@ function parseHidData(usageId, buffer, output) {
   * @param {object} output - The object to store parsed data.
   * @returns {object} - An object with the parsed UPS data.
   */
+  
+  //let acPresent = false;
+  //let charging = false;
+  //let discharging = false;
+  //let fullyCharged = false;
+  //let chargeStatus = "undefined";
+
   if (buffer.length < 5) {
     return; // Ignore short or malformed reports, seems to speed up processing..
   };
@@ -181,12 +249,30 @@ function parseHidData(usageId, buffer, output) {
       output.runTimeToEmpty = runTimeMin;
       break;
     case '0xd0':
-      const acPresent = (buffer[4] & 0b00000001) !== 0;
-      const charging = (buffer[12] & 0b00000001) !== 0;
-      const discharging = (buffer[20] & 0b00000001) !== 0;
-      const fullyCharged = (buffer[28] & 0b00000001) !== 0;
-      chargeStatus = "undefined";
+      //const acPresent = (buffer[4] & 0b00000001) !== 0;
+      //const charging = (buffer[12] & 0b00000001) !== 0;
+      //const discharging = (buffer[20] & 0b00000001) !== 0;
+      //const fullyCharged = (buffer[28] & 0b00000001) !== 0;
 
+      acPresent = (buffer[4] & 0b00000001) !== 0;
+      console.log('AC Present:', acPresent);
+      output.acPresent = acPresent;
+      break;
+
+    case '0x44':
+      charging = (buffer[4] & 0b00000001) !== 0;
+      //output.charging = charging;
+      break;
+    case '0x45':
+      discharging = (buffer[4] & 0b00000001) !== 0;
+      //output.discharging = discharging;
+      break;
+    case '0x46':
+      fullyCharged = (buffer[4] & 0b00000001) !== 0;
+      //output.fullyCharged = fullyCharged;
+
+      //chargeStatus = "undefined";
+      /*
       if (charging && acPresent && !discharging && !fullyCharged) {
         chargeStatus = "charging"; // State when on AC power and charging
         console.log('Charging state detected.');
@@ -198,8 +284,11 @@ function parseHidData(usageId, buffer, output) {
         chargeStatus = "fully-charged"; // State when on AC power and fully charged
         console.log('Fully charged state detected.');
       };
+      */
+      // evaluateBooleans(acPresent, charging, discharging, fullyCharged)
+      const chargeStatus = evaluateBooleans(acPresent, charging, discharging, fullyCharged);
 
-      output.acPresent = acPresent;
+      //output.acPresent = acPresent;
       output.chargeStatus = chargeStatus;
       /** 
        * @note Since this is a synchronous read, we can safely assume this is the last id
@@ -226,12 +315,23 @@ function startUpsHandler() {
     logVerbose('Listening for data... Press Ctrl+C to exit.');
 
     ups.on('data', function (data) {
-      const reportId = data[0];
-      const reportIdHex = `0x${reportId.toString(16).padStart(2, '0')}`;
+
+      const chunks = splitBufferIntoChunks(data, 8); // Split into 8-byte chunks
+      
+      chunks.forEach((chunk) => {
+        logVerbose(`Received data chunk: ${JSONstringifyHex(chunk)}`);
+        //logVerbose(`Received data chunk: ${JSONstringifyRaw(chunk)}`);
+        const reportId = chunk[0];
+        //const reportId = data[0];
+        const reportIdHex = `0x${reportId.toString(16).padStart(2, '0')}`;
 
       if (usagesToParse.includes(reportIdHex)) {
-        parseHidData(reportIdHex, data, reportData);
-        if (reportIdHex === '0xd0') {
+        
+        //parseHidData(reportIdHex, data, reportData);
+        parseHidData(reportIdHex, chunk, reportData);
+
+        //if (reportIdHex === '0xd0') {
+        if (reportIdHex === '0x46') {
           ee.once('done', () => {
             const entries = Object.entries(reportData);
             entries.sort((a, b) => {
@@ -268,6 +368,7 @@ function startUpsHandler() {
           });
         };
       };
+      });
     });
     ups.on('error', function (err) {
       console.error('HID device error:', err);
