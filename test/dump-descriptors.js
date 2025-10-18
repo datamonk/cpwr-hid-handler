@@ -1,7 +1,7 @@
 const HID = require('node-hid');
-import {red, bgRedBright} from 'yoctocolors';
+const colors = require('yoctocolors');
 
-console.log(bgRedBright('Test'));
+console.log(colors.bgRedBright('Test'));
 
 /**
  * @desc: Connect to the HID device using vendorId and productId or devicePath.
@@ -80,7 +80,8 @@ const getFeatureReport = (reportId, reportLength) => {
 
 const readInputReports = () => {
   device.on('data', (data) => {
-    console.log('Received input report:', data);
+    //console.log('Received input report:', data);
+    console.log(data);
     // The data format depends on the descriptor.
     // Use the descriptor to interpret this buffer.
   });
