@@ -17,7 +17,6 @@ function parseHidReport(buffer) {
     /**
     <Buffer 66 00 85 00 64 00 00 00 30 00 84 00 8c 00 00 00> - Remaining Capacity [DV] Sec. 31.4 [Battery Measures]: The predicted remaining capacity. (See CapacityMode for units.) 
                                                            & Reserved
-
     <Buffer 68 00 85 00 dd 09 00 00> - Run Time to Empty [DV] Sec. 31.4 [Battery Measures]: The predicted remaining battery life, in minutes, at the present rate of discharge. The RunTimeToEmpty is calculated based on either current or power depending on the CapacityMode setting
 <Buffer d0 00 85 00 01 00 00 00 44 00 85 00 00 00 00 00 45 00 85 00 00 00 00 00 46 00 85 00 01 00 00 00 43 00 85 00 00 00 00 00 42 00 85 00 00 00 00 00>
   - (d0) AC Present [DV] Sec. 31.7 [Charger Status]: Present/Not Present & 
@@ -26,7 +25,6 @@ function parseHidReport(buffer) {
     (46) Full Charged [Sel] & 
     (43) Remaining Time Limit Expired [Sel] Sec. 31.3.2 [Alarm]: Has expired & 
     (42) Below Remaining Capacity Limit [Sel] Sec. 31.3.2 [Alarm]: Is below
-
     */
     const schema = {
       hid: [
@@ -129,6 +127,8 @@ function parseHidReport(buffer) {
     const reportId = `0x${buffer.readUInt8(0).toString(16).padStart(2, '0')}`;
     const battery = buffer.readUInt16LE(4); // 0x66 
     const time = Math.floor(buffer.readUInt16LE(4) / 60); // 0x68 - Convert to min
+
+
     const acPresent = (buffer[4] & 0b00000001) !== 0; // 0xd0
     const charging = (buffer[12] & 0b00000001) !== 0; // 0xd0
     const discharging = (buffer[20] & 0b00000001) !== 0; // 0xd0

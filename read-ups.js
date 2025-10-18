@@ -193,8 +193,8 @@ function parseHidData(usageId, buffer, output) {
       } else if (discharging && !charging && !fullyCharged) {
         chargeStatus = "discharging"; // State when on battery and discharging
         console.log('Discharging state detected.');
-      //} else if (fullyCharged && acPresent && !charging && !discharging) {
-      } else if (fullyCharged && !charging && !discharging) {
+      } else if (fullyCharged && acPresent && !charging && !discharging) {
+      //} else if (fullyCharged && !charging && !discharging) {
         chargeStatus = "fully-charged"; // State when on AC power and fully charged
         console.log('Fully charged state detected.');
       };
@@ -274,7 +274,7 @@ function startUpsHandler() {
       if (ups) {
         ups.close();
       };
-      //setTimeout(startUpsHandler, 5000);
+      setTimeout(startUpsHandler, 5000);
     });
     process.on('SIGINT', () => {
       logVerbose('Caught interrupt signal (SIGINT). Closing device and exiting...');
@@ -285,7 +285,7 @@ function startUpsHandler() {
   } catch (err) {
     console.error('Failed to open HID device:', err.message);
     console.error('Make sure the UPS is connected and you have permissions (e.g., udev rules on Linux).');
-    //setTimeout(startUpsHandler, 5000);
+    setTimeout(startUpsHandler, 5000);
   };
 };
 
