@@ -38,9 +38,10 @@ const userArgs = process.argv.slice(2);
 for (let i = 0; i < userArgs.length; i++) {
   if (userArgs[i] === '--verbose' || userArgs[i] === '-v') {
     var verboseEnabled = true;
-    if (verboseEnabled) {
-      logVerbose('Verbose mode enabled.');
-    };
+    logVerbose('Verbose mode enabled.');
+  } else if (userArgs[i] === '--pretty' || userArgs[i] === '-p') {
+    var prettyEnabled = true;
+    logVerbose('Pretty print enabled.');
   } else if (userArgs[i] === '--device' || userArgs[i] === '-d') {
     if (i + 1 < userArgs.length) {
       devicePath = userArgs[i + 1].toLowerCase();
@@ -66,7 +67,7 @@ for (let i = 0; i < userArgs.length; i++) {
       process.exit(1);
     };
   } else if (userArgs[i] === '--help' || userArgs[i] === '-h') {
-    console.log('Usage: node read-ups.js [--mode <once|stream>] [--device </path/to/dev>] [--verbose]');
+    console.log('Usage: node read-ups.js [--mode <once|stream>] [--device </path/to/dev>] [--verbose] [--pretty]');
     process.exit(0);
   };
 };
@@ -141,7 +142,7 @@ function parseHidData(usageId, buffer, output) {
   */
 
   if (buffer.length < 5) {
-    return; // Ignore short or malformed reports, seems to speed up processing..
+    return; // Ignore short or malformed reports
   };
 
   switch (usageId) {
@@ -238,18 +239,22 @@ function startUpsHandler() {
               logVerbose('Incomplete buffer data received to complete payload, waiting for next read cycle..');
               return;
             };
-            // Output the final parsed report data as JSON to stdout
-            console.log(JSON.stringify(orderedReportData, null, 2));
+            // Output the final parsed report data to stdout
+            if (prettyEnabled) {
+              console.log(JSON.stringify(orderedReportData, null, 2));
+            } else {
+              console.log(JSON.stringify(orderedReportData));
+            };
             /**
              * @output
              * {
-                 "ts": "2025-10-12T03:19:11.546Z",
+                 "ts": 1760837972,
                  "path": "/dev/usb/hiddev0",
                  "batteryPercentage": 100,
                  "acPresent": true,
-                 "runTimeToEmpty": 42,
+                 "runTimeToEmpty": 40,
                  "chargeStatus": "fully-charged"
-               }
+              }
              */
             ee.emit('reset'); // signal reset event for next read cycle
           });
@@ -264,8 +269,6 @@ function startUpsHandler() {
               reportData = {};
               ee.removeAllListeners('done');
               ee.removeAllListeners('reset');
-              //logVerbose('Resetting report objects for next data read cycle...');
-              //return;
             };
           });
         };
