@@ -2,7 +2,7 @@ const HID = require('node-hid'); // @ref: https://github.com/node-hid/node-hid/b
 const col = require('yoctocolors'); // @ref: https://github.com/sindresorhus/yoctocolors#readme
 
 const EventEmitter = require('events');
-const ee = new EventEmitter(); // Event emitter instance to signal state of parsing lifecycle
+const ee = new EventEmitter(); // Event emitter instance to handle state of parsing lifecycle
 
 /** @globals */
 // Vendor and Product IDs for the CyberPower SL950U UPS
@@ -173,15 +173,21 @@ function parseHidData(usageId, buffer, output) {
       fullyCharged = (buffer[4] & 0b00000001) !== 0;
 
       const chargeStatus = deriveChargeStatus(acPresent, charging, discharging, fullyCharged);
-
       output.chargeStatus = chargeStatus;
+
       /** 
-       * @note Since this is a synchronous read, we can safely assume this is the last id
+       * @note Since this is a synchronous read, we can reasonably assume this is the last id
        *       we are going to parse data from. Add timestamp, devicePath to the output object
-       *       and signal a done state to the emitter. Ensuring a complete data object is gtg.
+       *       and signal a 'done' state to the emitter. There is still a second check later to
+       *       ensure all keys are present before output is dumped to stdout. Otherwise, another
+       *       read cycle will be evaluated.
        */
-      output.ts = new Date().toISOString();
       output.path = devicePath;
+      const currentTime = new Date();
+      //const timestamp = currentTime.toISOString();
+      const epochTime = Math.floor(currentTime.getTime() / 1000);
+      output.ts = epochTime;
+      
       ee.emit('done');
       break;
     default:
@@ -229,10 +235,9 @@ function startUpsHandler() {
             if (Object.keys(orderedReportData).length === 0) {
               return; // skip empty outputs dumped to stdout
             } else if (Object.keys(orderedReportData).length < 6) {
-              logVerbose('Incomplete buffer data received for this cycle to complete payload, waiting for next one..');
-              return; // wait for complete data set
+              logVerbose('Incomplete buffer data received to complete payload, waiting for next read cycle..');
+              return;
             };
-            //if (Object.keys(orderedReportData).length === 6) {
             // Output the final parsed report data as JSON to stdout
             console.log(JSON.stringify(orderedReportData, null, 2));
             /**
