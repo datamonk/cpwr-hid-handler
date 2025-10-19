@@ -225,10 +225,15 @@ function startUpsHandler() {
               return indexA - indexB;
             });
             const orderedReportData = Object.fromEntries(entries);
-            // Output the final parsed report data as JSON to stdout
+            
             if (Object.keys(orderedReportData).length === 0) {
               return; // skip empty outputs dumped to stdout
-            }
+            } else if (Object.keys(orderedReportData).length < 6) {
+              logVerbose('Incomplete buffer data received for this cycle to complete payload, waiting for next one..');
+              return; // wait for complete data set
+            };
+            //if (Object.keys(orderedReportData).length === 6) {
+            // Output the final parsed report data as JSON to stdout
             console.log(JSON.stringify(orderedReportData, null, 2));
             /**
              * @output
