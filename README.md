@@ -29,12 +29,13 @@ Development and testing was performed directly against the following `Cyber Powe
 
 ```bash
 # OPTIONS
-$ ./bin/read-ups [--device </path/to/dev>] --mode [once|stream] [--verbose]
+$ ./bin/read-ups [--device </path/to/dev>] --mode [once|stream] [--verbose] [--pretty]
 
 # EXAMPLE
 $ ./bin/read-ups --device /dev/usb/hiddev0 \
                  --mode once \
-                 --verbose
+                 --verbose \
+                 --pretty
 
 # ----- Running [read-ups.js] at Mon 13 Oct 2025 11:28:36 AM EDT -----
 #
@@ -108,4 +109,20 @@ $ find /dev -regex '.*hid.*' -type c -group plugdev -exec ls -la {} +
 
 #  crw-rw-rw- 1 root plugdev 239, 1 Oct 10 12:57 /dev/hidraw1
 #  crw-rw-rw- 1 root plugdev 180, 0 Oct 10 12:57 /dev/usb/hiddev0
+```
+
+## Tests
+
+Basic `PASS/FAIL` functional tests are in place for:
+
+- Command execution and argument validation
+- `test:unit` - Mocked unit tests using canned buffer data
+- `test:it` - Basic end-to-end integration pipeline
+
+```bash
+# Test runtime options
+$ npm run tests # all
+
+$ npm run test:unit
+$ npm run test:it
 ```

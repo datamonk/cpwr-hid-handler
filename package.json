@@ -16,7 +16,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node src/hid-handler.test.js"
+    "tests": "node src/hid-handler.test.js",
+    "test:unit": "node src/read-ups.unit.test.js",
+    "test:it": "node src/read-ups.it.test.js"
   },
   "repository": {
     "type": "git",
