@@ -2,29 +2,39 @@
      It's more reliable to user HTML directly for images.
   ![flux capacitor](./assets/batt_icon_256px.png){height=150}
   -->
-# CyberPower USB-HID Handler (cpwr-hid-handler)
+## CyberPower USB-HID Handler (cpwr-hid-handler)
 
 <img src="./assets/batt_icon_256px.png" align="right" alt="battery tilted" height="150" style="padding: 10px;">
 
-NodeJS based helper functions using the [`node-hid`](https://github.com/node-hid/node-hid) module to read, parse, convert and return stat values in JSON for personal Cyberpower UPS devices. This repo was created for use as a sub-module for another parent project to exclusivly READ data. So the codebase is fairly minimal and not intended as a complete API abstraction for `node-hid`.
+NodeJS based helper utility using the [`node-hid`](https://github.com/node-hid/node-hid) module to `read, parse, convert` and return state values in JSON for select CyberPower UPS devices connected via USB-HID. The codebase is fairly minimal and not intended as a complete abstraction for node-hid.
+
+### Scope
+
+This repository was created for integration as a submodule for another parent project to exclusively read data based on the standard HID Usage Tables (HUT) v1.6 specification for `Battery System Page (0x85)` usage page (*p.379*). 
+
+Official Source: https://usb.org/sites/default/files/hut1_6.pdf
+
+*NOTE*: A copy of this document is also bundled at: `./docs/hut1_6.pdf`
 
 ## Tested Devices
 
 Development and testing was performed directly against the following `Cyber Power System, Inc` UPS devices:
 
-* [CP1500PFCRM2U](https://www.cyberpowersystems.com/product/ups/pfc-sinewave/cp1500pfcrm2u/)
-* [SL950U](https://www.cyberpowersystems.com/product/ups/standby/sl950u/)
-* [SL750U](https://www.cyberpowersystems.com/product/ups/battery-backup/sl750u/)
-* [SX650U](https://www.cyberpowersystems.com/product/ups/battery-backup/sx650u/)
+* [VERIFIED] [CP1500PFCRM2U](https://www.cyberpowersystems.com/product/ups/pfc-sinewave/cp1500pfcrm2u/)
+* [VERIFIED] [SL950U](https://www.cyberpowersystems.com/product/ups/standby/sl950u/)
+* [TODO] [SL750U](https://www.cyberpowersystems.com/product/ups/battery-backup/sl750u/)
+* [TODO] [SX650U](https://www.cyberpowersystems.com/product/ups/battery-backup/sx650u/)
 
 ## Usage
 
 ```bash
-# opts
-$ ./bin/read-ups --mode [once|stream] [--report] [--verbose]
+# OPTIONS
+$ ./bin/read-ups [--device </path/to/dev>] --mode [once|stream] [--verbose]
 
-# example
-$ ./bin/read-ups --mode once --verbose
+# EXAMPLE
+$ ./bin/read-ups --device /dev/usb/hiddev0 \
+                 --mode once \
+                 --verbose
 
 # ----- Running [read-ups.js] at Mon 13 Oct 2025 11:28:36 AM EDT -----
 #
@@ -46,7 +56,7 @@ $ ./bin/read-ups --mode once --verbose
 
 ## Deployment
 
-### Standalone Install
+### Standalone
 
 ```bash
 $ git clone https://github.com/datamonk/cpwr-hid-handler.git \
@@ -58,11 +68,16 @@ $ git clone https://github.com/datamonk/cpwr-hid-handler.git \
 #     the project directory.
 $ ./utils/bootstrap.sh 
 ```
-
-### Submodule Integration
+### Submodule
 
 ```bash
-TODO
+# Parent repo dir for integration
+$ cd </path/to/github/parent-repo>
+
+$ git submodule add https://github.com/datamonk/cpwr-hid-handler.git modules/cpwr-hid-handler \
+  && git submodule update --init --force --recursive --remote \
+  && git commit -m "adding submodule for: cpwr-hid-handler" \
+  && git push -u origin main
 ```
 
 ### Setting udev rules for non-sudo exec
