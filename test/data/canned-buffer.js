@@ -1,4 +1,48 @@
 
+/*
+ * Canned buffer data for testing purposes
+ *
+ * Device Sample: SL950U
+ * [DEBUG] Raw buffer length: 16 bytes
+   [DEBUG] Received [raw]: <Buffer 66 00 85 00 64 00 00>
+   [DEBUG] Received [hex]: [0x66, 0x00, 0x85, 0x00, 0x64, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 30 00 84 00 8c 00 00>
+   [DEBUG] Received [hex]: [0x30, 0x00, 0x84, 0x00, 0x8c, 0x00, 0x00]
+   [DEBUG] Raw buffer length: 8 bytes
+   [DEBUG] Received [raw]: <Buffer 68 00 85 00 dd 09 00>
+   [DEBUG] Received [hex]: [0x68, 0x00, 0x85, 0x00, 0xdd, 0x09, 0x00]
+   [DEBUG] Raw buffer length: 48 bytes
+   [DEBUG] Received [raw]: <Buffer d0 00 85 00 01 00 00>
+   [DEBUG] Received [hex]: [0xd0, 0x00, 0x85, 0x00, 0x01, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 44 00 85 00 00 00 00>
+   [DEBUG] Received [hex]: [0x44, 0x00, 0x85, 0x00, 0x00, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 45 00 85 00 00 00 00>
+   [DEBUG] Received [hex]: [0x45, 0x00, 0x85, 0x00, 0x00, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 46 00 85 00 01 00 00>
+ * [DEBUG] Received [hex]: [0x46, 0x00, 0x85, 0x00, 0x01, 0x00, 0x00]
+ *
+ * Device Sample: PR1500
+ * [DEBUG] Raw buffer length: 24 bytes
+ * [DEBUG] Received [raw]: <Buffer 66 00 85 00 64 00 00>
+   [DEBUG] Received [hex]: [0x66, 0x00, 0x85, 0x00, 0x64, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 68 00 85 00 80 0c 00>
+   [DEBUG] Received [hex]: [0x68, 0x00, 0x85, 0x00, 0x80, 0x0c, 0x00]
+   [DEBUG] Received [raw]: <Buffer 2a 00 85 00 2c 01 00>
+   [DEBUG] Received [hex]: [0x2a, 0x00, 0x85, 0x00, 0x2c, 0x01, 0x00]
+   [DEBUG] Raw buffer length: 48 bytes
+   [DEBUG] Received [raw]: <Buffer d0 00 85 00 01 00 00>
+   [DEBUG] Received [hex]: [0xd0, 0x00, 0x85, 0x00, 0x01, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 44 00 85 00 00 00 00>
+   [DEBUG] Received [hex]: [0x44, 0x00, 0x85, 0x00, 0x00, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 45 00 85 00 00 00 00>
+   [DEBUG] Received [hex]: [0x45, 0x00, 0x85, 0x00, 0x00, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 42 00 85 00 00 00 00>
+   [DEBUG] Received [hex]: [0x42, 0x00, 0x85, 0x00, 0x00, 0x00, 0x00]
+   [DEBUG] Received [raw]: <Buffer 46 00 85 00 01 00 00>
+ * [DEBUG] Received [hex]: [0x46, 0x00, 0x85, 0x00, 0x01, 0x00, 0x00]
+*/
+
+
 const cannedDataOne = Buffer.from([0x66, 0x00, 0x85, 0x00, 0x64, 0x00, 0x00, 0x00, 0x30, 0x00, 0x84, 
     0x00, 0x8C, 0x00, 0x00, 0x00
   ]);
@@ -9,8 +53,8 @@ const cannedDataOne = Buffer.from([0x66, 0x00, 0x85, 0x00, 0x64, 0x00, 0x00, 0x0
     0x00, 0x00, 0x00
   ]);
 
-  const hidBufferBulk = [
+  const bufferFullReadCycle = [
     
   ];
   
-  module.exports = jsonData;
+  //module.exports = jsonData;
