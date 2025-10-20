@@ -72,20 +72,6 @@ for (let i = 0; i < userArgs.length; i++) {
   };
 };
 
-function logVerbose(...messages) {
-  if (verboseEnabled) {
-    console.log(`[${col.bgGray(`${col.bold('DEBUG')}`)}]`, ...messages);
-  };
-};
-
-function splitBufferIntoChunks(buffer, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < buffer.length; i += chunkSize) {
-    chunks.push(buffer.slice(i, i + chunkSize));
-  };
-  return chunks;
-};
-
 var JSONstringifyRaw = function(arr) {
   var str='<Buffer ';
   for (var i = 0; i < arr.length-1; i++) {
@@ -108,6 +94,20 @@ var JSONstringifyHex = function(arr) {
   return str;
 };
 
+function logVerbose(...messages) {
+  if (verboseEnabled) {
+    console.log(`[${col.bgGray(`${col.bold('DEBUG')}`)}]`, ...messages);
+  };
+};
+
+function splitBufferIntoChunks(buffer, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < buffer.length; i += chunkSize) {
+    chunks.push(buffer.slice(i, i + chunkSize));
+  };
+  return chunks;
+};
+
 function deriveChargeStatus(acPresent, charging, discharging, fullyCharged) {
   let chargeStatus;
   const states = {
@@ -116,8 +116,8 @@ function deriveChargeStatus(acPresent, charging, discharging, fullyCharged) {
     discharging: discharging,
     fullyCharged: fullyCharged
   };
-
   logVerbose('Evaluating charge states:', states);
+
   if (fullyCharged && acPresent) {
     chargeStatus = "fully-charged";
   } else if (charging && acPresent) {
@@ -125,9 +125,9 @@ function deriveChargeStatus(acPresent, charging, discharging, fullyCharged) {
   } else if (discharging && !acPresent) {
     chargeStatus = "discharging";
   } else {
-    chargeStatus = "undefined"; // catch all remaining unknown states
+    // Catch all remaining unknown states
+    chargeStatus = "undefined";
   };
-
   logVerbose('Derived charge status:', col.bold(`${chargeStatus}`));
   return chargeStatus;
 };
@@ -147,17 +147,18 @@ function parseHidData(usageId, buffer, output) {
 
   switch (usageId) {
     case '0x66':
-      const remainingCapacity = buffer.readUInt16LE(4); // Bytes 4-5
+      const remainingCapacity = buffer.readUInt16LE(4); // byte range (4-5)
       output.batteryPercentage = remainingCapacity;
       break;
     case '0x68':
      /** 
-      * @note hut1.6 usage desc states 'Run Time to Empty' unit is in minutes..but its 
+      * @note HUT 1.6 usage desc states 'Run Time to Empty' unit is in minutes..but it's 
       *       actually seconds. So we need to convert it to min here.
+      * 
       * @ref  https://usb.org/sites/default/files/hut1_6.pdf#page=386&zoom=100,57,57
       */
-      const runTimeSec = buffer.readUInt16LE(4); // Bytes 4-5
-      const runTimeMin = Math.floor(runTimeSec / 60); // convert to min
+      const runTimeSec = buffer.readUInt16LE(4); // byte range (4-5)
+      const runTimeMin = Math.floor(runTimeSec / 60); // Convert sec > min
       output.runTimeToEmpty = runTimeMin;
       break;
     case '0xd0':
@@ -179,20 +180,21 @@ function parseHidData(usageId, buffer, output) {
       /** 
        * @note Since this is a synchronous read, we can reasonably assume this is the last id
        *       we are going to parse data from. Add timestamp, devicePath to the output object
-       *       and signal a 'done' state to the emitter. There is still a second check later to
+       *       and signal a 'done' state to the emitter. There is still a secondary check later to
        *       ensure all keys are present before output is dumped to stdout. Otherwise, another
        *       read cycle will be evaluated.
        */
       output.path = devicePath;
       const currentTime = new Date();
-      //const timestamp = currentTime.toISOString();
       const epochTime = Math.floor(currentTime.getTime() / 1000);
       output.ts = epochTime;
       
       ee.emit('done');
       break;
     default:
-      break; // Skip all other ids even though we are checking for enabled ones only
+      // Skip all other ID's seen even though we are checking for permitted ones with
+      // 'usagesToParse' prior to the case statement.
+      break;
   };
 };
 
@@ -234,16 +236,18 @@ function startUpsHandler() {
             const orderedReportData = Object.fromEntries(entries);
             
             if (Object.keys(orderedReportData).length === 0) {
-              return; // skip empty outputs dumped to stdout
+              // Skip empty outputs dumped to STDOUT. This will omit
+              // unwanted reset emitted output.
+              return;
             } else if (Object.keys(orderedReportData).length < 6) {
-              logVerbose('Incomplete buffer data received to complete payload, waiting for next read cycle..');
+              logVerbose('Incomplete buffer data received for finished payload, consuming from next read cycle..');
               return;
             };
             // Output the final parsed report data to stdout
             if (prettyEnabled) {
-              console.log(JSON.stringify(orderedReportData, null, 2));
+              console.log(JSON.stringify(orderedReportData, null, 2)); // pretty-printed
             } else {
-              console.log(JSON.stringify(orderedReportData));
+              console.log(JSON.stringify(orderedReportData)); // condensed
             };
             /**
              * @output
@@ -266,7 +270,7 @@ function startUpsHandler() {
               };
               process.exit(0);
             } else {
-              reportData = {};
+              reportData = {}; // clear any content from last iteration.
               ee.removeAllListeners('done');
               ee.removeAllListeners('reset');
             };
