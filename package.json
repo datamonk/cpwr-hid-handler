@@ -2,5 +2,31 @@
   "dependencies": {
     "node-hid": "^3.2.0",
     "yoctocolors": "^2.1.2"
-  }
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "prettier": "^3.6.2"
+  },
+  "name": "cpwr-hid-handler",
+  "description": "<!-- Styling brackets in native markdown works but can run into compatibility issues.      It's more reliable to user HTML directly for images.   ![flux capacitor](./assets/batt_icon_256px.png){height=150}   --> ## CyberPower USB-HID Handler (cpwr-hid-handler)",
+  "version": "1.0.0",
+  "main": "read-ups.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node src/hid-handler.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datamonk/cpwr-hid-handler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/datamonk/cpwr-hid-handler/issues"
+  },
+  "homepage": "https://github.com/datamonk/cpwr-hid-handler#readme"
 }

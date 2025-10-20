@@ -70,7 +70,8 @@ inst_node_modules(){
   cd "${_wai}/../" || exit 1;
     if ! npm list --depth=0 "node-hid" "yoctocolors" >/dev/null 2>&1; then
       echo "installing npm modules from package.json";
-      npm install >/dev/null; ret=$?;
+      #npm install >/dev/null; ret=$?; # all deps
+      npm install --production >/dev/null; ret=$?; # non-dev deps by default
       if [[ ${ret} -ne 0 ]]; then
         echo "npm install for modules returned [${ret}]";
         exit 1;

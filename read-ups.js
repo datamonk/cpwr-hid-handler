@@ -212,8 +212,9 @@ function startUpsHandler() {
     ups.on('data', function (data) {
       /**
        * @note Split into 8-byte chunks from the raw buffer received since various UPS models
-       *       send multiple reports in a single data event. By splitting into chunks,
-       *       we can parse consistently for each usage/report id.
+       *       send multiple reports concatenated in a single Buffer message. By splitting
+       *       into chunks, we can parse consistently for each Usage ID regardless of the
+       *       initial event length.
        */
       logVerbose(`Raw buffer length: ${col.yellowBright(`${data.length}`)} bytes`);
       const chunks = splitBufferIntoChunks(data, 8);

@@ -1,0 +1,13 @@
+# @ref https://prettier.io/docs/ignore
+# node --eval "fs.writeFileSync('.prettierignore','# Ignore artifacts:\nbuild\ncoverage\n')"
+
+# Ignore build artifacts:
+build
+coverage
+
+# Ignore NodeJS nested module files:
+**/node_modules
+
+# Ignore other obvious Non-JS files:
+**/.git
+**/*.html

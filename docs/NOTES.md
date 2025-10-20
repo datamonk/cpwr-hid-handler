@@ -1,4 +1,4 @@
-### HID Parsing Notes
+## HID Parsing Notes
 
 ```bash
 # Raw Buffer Iteration Sample (SL950U)
@@ -64,9 +64,9 @@
 - 40 (1): Terminate Charge - Value Byte [4-5] (Ignore)
 ```
 
-## Buffer Read Cycle Mapping (CP1500PFCRM2U)
+## Buffer HID Mapping `CP1500PFCRM2U`
 
-### Full Iteration
+### Full Read Cycle Iteration
 ```bash
 <Buffer 66 00 85 00 64 00 00 00 68 00 85 00 80 0c 00 00 2a 00 85 00 2c 01 00 00>
 <Buffer d0 00 85 00 01 00 00 00 44 00 85 00 00 00 00 00 45 00 85 00 00 00 00 00 42 00 85 00 00 00 00 00 46 00 85 00 01 00 00 00 43 00 85 00 00 00 00 00>
@@ -74,8 +74,12 @@
 <Buffer 33 00 84 00 98 00 00 00>
 ```
 
-### Per Event Usage ID Mapping
+### Per Event Usage Mapping `split by 8-byte sets`
+
+Byte Length: `24`
+
 `<Buffer 66 00 85 00 64 00 00 00 68 00 85 00 80 0c 00 00 2a 00 85 00 2c 01 00 00>`
+
 - 66 (1): Remaining Capacity - Value Bytes [4-5]
 - 68 (2): Run Time To Empty - Value Bytes [12-13]
 - 2a (3): Remaining Time Limit - Value Byte [20-21] (Ignore)

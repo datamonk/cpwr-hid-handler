@@ -64,9 +64,12 @@ $ git clone https://github.com/datamonk/cpwr-hid-handler.git \
 
 # Run bootstrap:
 #   - Installs NodeJS locally if binaries not in $PATH
-#   - Installs the required package.json modules within
-#     the project directory.
-$ ./utils/bootstrap.sh 
+#   - Installs non-dev package.json modules.
+$ ./utils/bootstrap.sh
+
+# [OPTIONAL] To support tests, linting for development
+#            purposes, run:
+$ npm install -D
 ```
 ### Submodule
 
