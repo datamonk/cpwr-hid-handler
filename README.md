@@ -69,8 +69,12 @@ $ git clone https://github.com/datamonk/cpwr-hid-handler.git \
 $ ./utils/bootstrap.sh
 
 # [OPTIONAL] To support tests, linting for development
-#            purposes, run:
 $ npm install -D
+
+# [OPTIONAL] Updating package.json version baseline
+#            and upgrade packages.
+$ ncu -u \
+  && npm install
 ```
 ### Submodule
 
@@ -125,4 +129,30 @@ $ npm run tests # all
 
 $ npm run test:unit
 $ npm run test:it
+```
+
+## Misc.
+
+Regarding legacy versions of NodeJS using GLIBC_2.17 to match an older OS distro, node module support has been dropped by many packages using the last stable release at v17.9.1. Starting with v18.x, The GLIBC requirement jumps to 2.27+. You will likely see an error similar to the below if your OS doesn't support the newer baseline of NodeJS during the bootstrap process.
+
+```bash
+node: /lib64/libm.so.6: version `GLIBC_2.27' not found (required by node)
+node: /lib64/libc.so.6: version `GLIBC_2.27' not found (required by node)
+node: /lib64/libc.so.6: version `GLIBC_2.28' not found (required by node)
+Error installing Node.js version 24.
+```
+
+The `package.json` target dependency versions will have to be dropped down for the following:
+
+- Jest drops support for 17.x after [`=28.1.3`]: https://github.com/jestjs/jest/blob/main/CHANGELOG_PRE_v30.md#2813
+- yoctocolors requires min ver. of 18.x after [`=1.0.0`]: https://github.com/sindresorhus/yoctocolors/releases/tag/v1.0.0
+
+```bash
+$ node -v && npm list
+    v17.9.1
+    cpwr-hid-handler@1.0.0 ./cpwr-hid-handler
+    ├── jest@28.1.3
+    ├── node-hid@3.2.0
+    ├── prettier@3.6.2
+    └── yoctocolors@1.0.0
 ```
