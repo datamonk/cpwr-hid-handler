@@ -1,5 +1,5 @@
 // src/hid-handler.test.js
-const HidHandler = require('./hid-handler');
+const HidHandler = require('./hid-handler.js');
 const HID = require('node-hid');
 const { Buffer } = require('buffer');
 

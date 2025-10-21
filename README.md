@@ -125,10 +125,10 @@ Basic `PASS/FAIL` functional tests are in place for:
 
 ```bash
 # Test runtime options
-$ npm run tests # all
+$ npm test # all
 
-$ npm run test:unit
-$ npm run test:it
+$ npm test:unit
+$ npm test:it
 ```
 
 ## Misc.

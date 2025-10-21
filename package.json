@@ -20,7 +20,7 @@
     "test": "test"
   },
   "scripts": {
-    "tests": "node src/hid-handler.test.js",
+    "test": "jest",
     "test:unit": "node src/read-ups.unit.test.js",
     "test:it": "node src/read-ups.it.test.js"
   },
