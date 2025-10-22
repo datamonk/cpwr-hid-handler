@@ -20,9 +20,9 @@
     "test": "test"
   },
   "scripts": {
+    "read-ups": "node read-ups.js",
     "test": "jest",
-    "test:unit": "node src/read-ups.unit.test.js",
-    "test:it": "node src/read-ups.it.test.js"
+    "test:unit": "jest --detectOpenHandles --expand --logHeapUsage --config jest.config.js"
   },
   "repository": {
     "type": "git",
