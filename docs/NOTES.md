@@ -1,20 +1,8 @@
 <style>
-mark { background-color: #FBEC5D; /* Default Maize/Yellow for <mark> tag */ };
-.hi-gre { background-color: #aaeebb; /* LightGreen */ };
-.hi-red { background-color: #ff0000; /* Red */ };
-.hi-ora { background-color: #FF7518; /* Orange/Pumpkin */ };
-
-/** @ref
- * <p><span class="hi-gre">Used</span></p>
- * <p><span style="background-color: LemonChiffon;">Used</span></p>
- *
- * LightGray = #d3d3d3
- * LightYellow: #FFFFE0
- * LemonChiffon: #FFFACD
- * LightGoldenRodYellow: #FAFAD2
- * Pastel Yellow: #FFFAA0
- * Cream: #FFFDD0
- **/
+mark { background-color: #FBEC5D; }
+.hi-gre { background-color: #aaeebb; }
+.hi-red { background-color: #ff0000; }
+.hi-ora { background-color: #FF7518; }
 </style>
 
 # HID Parsing Breakdown
