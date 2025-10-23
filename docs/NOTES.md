@@ -1,3 +1,7 @@
+<!-- Per usual, CSS compatibility beyond the most basic
+     use comes down to 'it depends'. To avoid that rabbit
+     hole for now, im just going to apply sytling inline
+     with the content... :| -->
 <style>
 mark { background-color: #FBEC5D; }
 .hi-gre { background-color: #aaeebb; }
@@ -37,13 +41,12 @@ There are several common methods to retrieve a descriptor report based on HID in
 1. First, identify the used device path (likely `/dev/usb/hiddev0`)
 
 ```bash
-cat /sys/class/usb/hiddev0/device/report_descriptor | od -tx1 -Anone
+$ cat /sys/bus/hid/devices/0003:0764:0501.0002/report_descriptor | od -tx1 -Anone
 
 # @output
-#   <hexdecimal values block example>
-#   ...
-#
-
+  05 84 09 04 a1 01 09 24 a1 00 85 1d 09 fe 75 08
+  95 01 15 00 26 ff 00 b1 22 85 03 09 fd b1 22 05
+# ...
 ```
 2. Copy the path and navigate to https://eleccelerator.com/usbdescreqparser/
 
