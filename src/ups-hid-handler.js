@@ -10,7 +10,7 @@ const { Logger } = require('../lib/logger.js');
 const logger = new Logger(false); // Default boolean to enable debug logs
 
 const { splitBufferIntoChunks, JSONstringifyRaw, JSONstringifyHex } = require('../lib/common.js');
-const { parseHidData } = require('./hid-parser.js');
+const { parseHidData } = require('./ups-hid-parser.js');
 
 /**
  * @desc Main class to handle communication with an UPS instance via HID.
