@@ -1,4 +1,4 @@
-// __mocks__/node-hid2.js
+// __mocks__/node-hid.js
 
 const mockDevices = {
     // Mock data for a keyboard

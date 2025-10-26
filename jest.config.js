@@ -9,11 +9,12 @@
 */
 
 // Sync object
+///** @type {import('jest').Config} */
 /** @type {import('@jest/types').Config.InitialOptions} */
 
 // transform pattern pulled from => https://github.com/nrwl/nx/issues/812
 //const esModules = ['fs', 'child_process'].join('|');
-const esModules = ['fs', 'node-hid'].join('|');
+const esModules = ['yargs', 'yargs-parser'].join('|');
 
 const config = {
   verbose: true,
@@ -33,14 +34,18 @@ const config = {
     '/utils/'
   ],
   transformIgnorePatterns: [
-    `/node_modules/(?!${esModules})`
+    `/node_modules/(?!${esModules})/`
   ],
-  //moduleNameMapper: {
-  //  "common.js": "<rootDir>/lib/common.js"
-  //}
-  
-  //transform: {
-  //  '\\.[jt]sx?$': '<rootDir>/packages/babel-jest',
-  //}
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx|mjs)$': 'babel-jest',
+  },
+  //extensionsToTreatAsEsm: [
+  //  '.ts', '.tsx', '.mjs'
+  //],
+  moduleNameMapper: {
+    "^node-hid$": "<rootDir>/__mocks__/node-hid.js",
+    //"^yargs$": "<rootDir>/__mocks__/yargs.js",
+  },
 };
+
 module.exports = config;

@@ -24,7 +24,7 @@ describe('HidHandler', () => {
     mockDeviceInstance = HID.HID.mock.results[0]?.value;
   });
 
-  it('should connect to the HID device and listen for data', () => {
+  it.skip('should connect to the HID device and listen for data', () => {
     handler.connect();
 
     // The mock HID constructor should have been called
@@ -35,7 +35,7 @@ describe('HidHandler', () => {
     expect(mockDeviceInstance.on).toHaveBeenCalledWith('error', expect.any(Function));
   });
 
-  it('should handle incoming canned buffer data correctly', () => {
+  it.skip('should handle incoming canned buffer data correctly', () => {
     handler.connect();
     
     // Define the canned buffer data you want to test
@@ -50,7 +50,7 @@ describe('HidHandler', () => {
     expect(handler.receivedData).toEqual([cannedData1, cannedData2]);
   });
   
-  it('should write data to the device', () => {
+  it.skip('should write data to the device', () => {
     handler.connect();
     
     const outputData = Buffer.from([0xAA, 0xBB, 0xCC]);

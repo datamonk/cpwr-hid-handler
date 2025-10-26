@@ -2,11 +2,15 @@
   "dependencies": {
     "node-hid": "^3.2.0",
     "winston": "^3.18.3",
-    "yoctocolors": "^2.1.2"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "jest": "^30.2.0",
-    "npm-check-updates": "^19.1.1",
+    "lodash": "^4.17.21",
     "prettier": "^3.6.2"
   },
   "name": "cpwr-hid-handler",
@@ -22,8 +26,7 @@
   },
   "scripts": {
     "read-ups": "node read-ups.js",
-    "test": "jest",
-    "test:unit": "jest --detectOpenHandles --expand --logHeapUsage --config jest.config.js"
+    "test": "jest --config jest.config.js"
   },
   "repository": {
     "type": "git",
