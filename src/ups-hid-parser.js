@@ -1,9 +1,20 @@
-const col = require('yoctocolors'); 
+//const col = require('yoctocolors'); 
+const logger = require('../lib/logger.js');
+const { devicePath } = require('./ups-hid-handler.js');
+
+/**
+ * Derives the charge status based on AC presence and charging states.
+ * @param {boolean} acPresent - Whether AC power is present.
+ * @param {boolean} charging - Whether the battery is currently charging.
+ * @param {boolean} discharging - Whether the battery is currently discharging.
+ * @param {boolean} fullyCharged - Whether the battery is fully charged.
+ * @returns {string} - The derived charge status ('charging', 'discharging', 'full', 'unknown').
+ */
 
 const EventEmitter = require('events');
 const ee = new EventEmitter();
 
-const { Logger } = require('../lib/logger.js');
+
 
 class UpsHidParser {
   constructor(usageId, buffer, output) {

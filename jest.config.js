@@ -1,19 +1,15 @@
 'use strict';
 /**
   * @file jest.config.js
-  * @ref https://jestjs.io/docs/configuration#defaults
   * @tldr This config should get picked up automatically with default naming and
   *       in the root project directory. I have specified the --config path
   *       within the npm run script for 'test' to make it obvious what config
   *       is being used.
-*/
-
-// Sync object
-///** @type {import('jest').Config} */
+  * @see https://jestjs.io/docs/configuration#defaults
+  */
 /** @type {import('@jest/types').Config.InitialOptions} */
 
-// transform pattern pulled from => https://github.com/nrwl/nx/issues/812
-//const esModules = ['fs', 'child_process'].join('|');
+/** @ref https://github.com/nrwl/nx/issues/812 */
 const esModules = ['yargs', 'yargs-parser'].join('|');
 
 const config = {
@@ -27,6 +23,7 @@ const config = {
     name: 'unit tests',
   },
   testPathIgnorePatterns: [
+    '/_ref/',
     '/assets/',
     '/bin/',
     '/docs/',
@@ -39,9 +36,6 @@ const config = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx|mjs)$': 'babel-jest',
   },
-  //extensionsToTreatAsEsm: [
-  //  '.ts', '.tsx', '.mjs'
-  //],
   moduleNameMapper: {
     "^node-hid$": "<rootDir>/__mocks__/node-hid.js",
     //"^yargs$": "<rootDir>/__mocks__/yargs.js",
