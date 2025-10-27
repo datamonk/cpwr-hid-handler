@@ -57,8 +57,7 @@ Below is a modified structure based on the general standards mentioned above.
     ├── helpers/
     │   ├── args.js // [ runtime arg eval for global use ]
             ├── function evalArgs()
-            ├── function purgeRuntimeArgs() // @todo
-            └── function saveRuntimeArgs() // @todo
+
     │   └── args.test.js
     │   ├── logger.js
             └── const logger = winston.createLogger()
@@ -74,6 +73,9 @@ Below is a modified structure based on the general standards mentioned above.
     │   ├── 
     │   └── ??
     ├── services/
+    |   ├── tmp-file-writer.js
+            └── function tmpFileWriter() // [ handles args config lifecycle ]
+    |   ├── tmp-file-writer.test.js
     │   ├── ups-hid-parser.js
             ├── class UpsHidParser{}
                 └── method parse() // [ case statement hand-off by UsageID ]
