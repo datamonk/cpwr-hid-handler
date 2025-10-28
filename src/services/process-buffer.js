@@ -1,4 +1,4 @@
-const logger = require('../../lib/logger.js');
+const logger = require('../helpers/logger.js');
 
 //const { deriveChargeStatus } = require('../services/charge-status-service.js');
 //const parseUsage = require('../services/parse-usage.js');

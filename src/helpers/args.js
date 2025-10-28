@@ -1,12 +1,31 @@
+//const logger = require('./logger.js');
+
+//const { parsed } = require("yargs");
+
+//import { parse } from "yargs";
+
+const fs = require('fs');
 
 // lib/args.js
 
-const Logger = require('./lib/logger.js');
-const logger = new Logger(false); // Default boolean to enable debug logs
+//const Logger = require('./lib/logger.js');
+//const logger = new Logger(false); // Default boolean to enable debug logs
 
 // export let verboseEnabled = true|false;
 
 //let devicePath = "/dev/usb/hiddev0"; // Default path if not overridden with opt.
+
+function saveOptsConfig(configPath, payload) {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(payload, null, 2));
+    console.log('runtime configuration saved to:', configPath);
+    console.log(payload);
+    return configPath;
+  } catch (err) {
+    console.error('Failed to write configuration file:', err);
+    process.exit(1);
+  }
+}
 
 /**
  * @desc Parse command-line arguments to extract UPS device path if provided.
@@ -23,14 +42,16 @@ function evalArgs(args, devicePath, opts) {
   for (let i = 0; i < args.length; i++) {
   if (args[i] === '--debug' || args[i] === '-d') {
     var debugEnabled = true;
-    logger.debug('Verbose mode enabled.');
+    //const debugEnabled = true;
+    //logger.debug('Verbose mode enabled.');
   } else if (args[i] === '--pretty' || args[i] === '-p') {
     var prettyEnabled = true;
-    logger.debug('Pretty print enabled.');
+    //const prettyEnabled = true;
+    //logger.debug('Pretty print enabled.');
   } else if (args[i] === '--device' || args[i] === '-d') {
     if (i + 1 < args.length) {
       devicePath = args[i + 1].toLowerCase();
-      logger.debug('Device path set to:', devicePath);
+      //logger.debug('Device path set to:', devicePath);
     } else {
       console.error('No device path provided after --device or -d flag.');
       process.exit(1);
@@ -61,9 +82,27 @@ function evalArgs(args, devicePath, opts) {
   opts.prettyEnabled = prettyEnabled || false;
   opts.onceModeEnabled = onceModeEnabled || false;
   opts.devicePath = devicePath || "/dev/usb/hiddev0";
-  
-  return opts;
+
+  const parsedOpts = {
+    debugEnabled: opts.debugEnabled,
+    prettyEnabled: opts.prettyEnabled,
+    onceModeEnabled: opts.onceModeEnabled,
+    devicePath: opts.devicePath
+  };
+
+  if (opts.debugEnabled) {
+    console.log('Parsed options:', parsedOpts);
+    //logger.debug('Parsed options:', parsedOpts);
+  }
+
+  const configPath = './../src/config/runtime.opts.json'
+  saveOptsConfig(configPath, parsedOpts)
+
+  return parsedOpts;
 }
+
+
+
 
 module.exports = {
     evalArgs

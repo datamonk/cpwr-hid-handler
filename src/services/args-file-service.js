@@ -6,7 +6,7 @@ const path = require('path');
  * @param {string} filePath The path to the temporary file.
  * @param {object} data The data object to be written.
  */
-function tmpFileWriter(filePath, data) {
+function writeArgsFile(filePath, data) {
   // Convert the object to a JSON string
   const jsonData = JSON.stringify(data, null, 2);
 
@@ -41,4 +41,6 @@ function tmpFileWriter(filePath, data) {
   });
 }
 
-module.exports = tmpFileWriter;
+module.exports = {
+    writeArgsFile
+};

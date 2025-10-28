@@ -1,3 +1,6 @@
+# Project
+src/config/.runtime-args.json
+
 # Logs
 logs
 *.log

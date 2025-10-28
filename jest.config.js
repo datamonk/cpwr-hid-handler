@@ -24,11 +24,13 @@ const config = {
   },
   testPathIgnorePatterns: [
     '/_ref/',
+    '/lib/',
     '/assets/',
     '/bin/',
     '/docs/',
     '/node_modules/',
-    '/utils/'
+    '/utils/',
+    '/src/config/'
   ],
   transformIgnorePatterns: [
     `/node_modules/(?!${esModules})/`

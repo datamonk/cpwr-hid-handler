@@ -1,6 +1,6 @@
 const path = require('path');
 
-const { tmpFileWriter } = require('./tmp-file-writer.js');
+const { writeArgsFile } = require('./tmp-file-writer.js');
 
 // Example of a runtime argument object
 const myArgs = {
@@ -15,7 +15,7 @@ console.log(__dirname);
 const filePath = path.join(__dirname, '../config/.runtime-args.json');
 
 // Call the function to write the data and set up the cleanup
-tmpFileWriter(filePath, myArgs);
+writeArgsFile(filePath, myArgs);
 
 fs.readFile(filePath, 'utf8', (err, data) => {
   if (err) {
