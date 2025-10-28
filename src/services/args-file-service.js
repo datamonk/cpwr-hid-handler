@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { existsSync, unlinkSync, writeFileSync } = require('fs');
 const path = require('path');
 
 /**
@@ -7,19 +7,17 @@ const path = require('path');
  * @param {object} payload The data object to be written.
  */
 function writeArgsFile(configPath, payload) {
-  // Convert the object to a JSON string
-  const jsonData = JSON.stringify(payload, null, 2);
 
-  // Use a full path for reliability
+  const jsonData = JSON.stringify(payload, null, 2);
   const fullPath = path.resolve(configPath);
 
   try {
-    if (fs.existsSync(fullPath)) {
+    if (existsSync(fullPath)) {
       console.log(`Detected pre-existing args file: ${fullPath}`);
-      fs.unlinkSync(fullPath);
+      unlinkSync(fullPath);
       console.log(`Successfully removed old args file`);
     }
-    fs.writeFileSync(fullPath, jsonData); // attempt write of new config
+    writeFileSync(fullPath, jsonData); // attempt write of new config
     console.log(`Successfully wrote args config object to: ${fullPath}`);
   } catch (err) {
     console.error(`Error handling args config file: ${err.message}`);
@@ -28,8 +26,8 @@ function writeArgsFile(configPath, payload) {
   // Cleanup function to be called on process exit
   process.on('exit', () => {
     try {
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
+      if (existsSync(fullPath)) {
+        unlinkSync(fullPath);
         console.log(`Successfully removed temporary file: ${fullPath}`);
       }
     } catch (err) {

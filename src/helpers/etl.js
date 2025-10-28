@@ -1,24 +1,26 @@
-const col = require('yoctocolors');
+//const col = require('yoctocolors');
 
 var JSONstringifyRaw = function(arr) {
+  const { magentaBright } = require('yoctocolors');
   var str='<Buffer ';
   for (var i = 0; i < arr.length-1; i++) {
     str += arr[i].toString(16).padStart(2, '0');
     if(i<arr.length-2) { str+=' '; }
   };
   str += '>';
-  str = col.magentaBright(str);
+  str = magentaBright(str);
   return str;
 };
 
 var JSONstringifyHex = function(arr) {
+  const { cyanBright } = require('yoctocolors');
   var str='[';
   for (var i = 0; i < arr.length-1; i++) {
     str += '0x' + arr[i].toString(16).padStart(2, '0');
     if(i<arr.length-2) { str+=', '; }
   }
   str += ']';
-  str = col.cyanBright(str);
+  str = cyanBright(str);
   return str;
 };
 
@@ -42,11 +44,7 @@ function sortObjectElements(inputObject, keyOrder) {
 };
 
 function deriveChargeStatus(acPresent, charging, discharging, fullyCharged) {
-  let chargeStatus;
-  //let acPresent = false;
-  //let charging = false;
-  //let discharging = false;
-  //let fullyCharged = false;
+  let status;
   const states = {
     acPresent: acPresent,
     charging: charging,
@@ -55,16 +53,16 @@ function deriveChargeStatus(acPresent, charging, discharging, fullyCharged) {
   };
   //logger.debug('Evaluating charge states:', states);
   if (fullyCharged && acPresent) {
-    chargeStatus = "fully-charged";
+    status = "fully-charged";
   } else if (charging && acPresent) {
-    chargeStatus = "charging";
+    status = "charging";
   } else if (discharging && !acPresent) {
-    chargeStatus = "discharging";
+    status = "discharging";
   } else {
-    chargeStatus = "undefined"; // Catch all remaining unknown states
+    status = "undefined"; // Catch all remaining unknown states
   };
   //logger.debug('Derived charge status:', col.bold(`${chargeStatus}`));
-  return chargeStatus;
+  return status;
 };
 
 module.exports = {

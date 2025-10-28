@@ -1,19 +1,28 @@
 const winston = require('winston');
 const { combine, timestamp, colorize, errors, printf } = winston.format;
+const path = require('path');
+const fs = require('fs');
 
-const { evalArgs } = require('./args.js');
+const configPath = path.join(__dirname, '../config/.runtime-args.json');
 
-//import yargs from 'yargs';
-//import { hideBin } from 'yargs/helpers';
+let showDebug;
+let logLevel;
 
-//const yargs = require('yargs/yargs');
-//const { hideBin } = require('yargs/helpers');
-//const yargs = require('yargs');
-//const { hideBin } = require('yargs/helpers');
-//import yargs from 'yargs';
-//import { hideBin } from 'yargs/helpers';
+fs.readFile(configPath, 'utf8', (err, obj) => {
+  if (err) {
+    console.error('Error reading JSON file:', err);
+    return;
+  }
 
-//const _ = require('lodash');
+  try {
+    const config = JSON.parse(obj);
+    console.log(config.debugEnabled);
+    showDebug = config.debugEnabled || false;
+    logLevel = showDebug ? 'debug' : 'info';
+  } catch (err) {
+    console.error('Error parsing JSON data:', err);
+  }
+});
 
 // Define custom log levels
 const logLevels = {
@@ -24,26 +33,6 @@ const logLevels = {
   debug: 4,
   trace: 5,
 };
-
-// Use yargs to parse the command-line arguments
-// `hideBin` removes the first two elements ('node' and the script path) from process.argv
-/**
-const argv = yargs(hideBin(process.argv))
-  .option('debug', {
-    alias: 'd',
-    type: 'boolean',
-    description: 'Enable debug logging',
-  })
-  .parse();
-*/
-
-// Determine the log level based on the debug flag
-//const showDebug = opts.debugEnabled || false;
-const showDebug = evalArgs(process.argv.slice(2)).opts.debugEnabled || false;
-const logLevel = showDebug ? 'debug' : 'info';
-
-// Determine the log level based on the command-line flag
-//const logLevel = argv.debug ? 'debug' : 'info';
 
 const logger = winston.createLogger({
   levels: logLevels,

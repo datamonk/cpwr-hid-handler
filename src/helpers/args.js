@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { readFile } = require('fs');
 const path = require('path');
 
 const { writeArgsFile } = require(path.join(__dirname, '../services/args-file-service.js'));
@@ -71,7 +71,7 @@ function evalArgs(args, devicePath, opts) {
 
   writeArgsFile(configPath, opts);
 
-  fs.readFile(configPath, 'utf8', (err, data) => {
+  readFile(configPath, 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       return;
