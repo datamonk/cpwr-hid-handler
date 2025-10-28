@@ -3,26 +3,29 @@ const path = require('path');
 
 /**
  * Writes an object to a temporary file and removes it on process exit.
- * @param {string} filePath The path to the temporary file.
- * @param {object} data The data object to be written.
+ * @param {string} configPath The path to the temporary file.
+ * @param {object} payload The data object to be written.
  */
-function writeArgsFile(filePath, data) {
+function writeArgsFile(configPath, payload) {
   // Convert the object to a JSON string
-  const jsonData = JSON.stringify(data, null, 2);
+  const jsonData = JSON.stringify(payload, null, 2);
 
   // Use a full path for reliability
-  const fullPath = path.resolve(filePath);
+  const fullPath = path.resolve(configPath);
 
   try {
-    // Write the JSON data to the file synchronously
-    fs.writeFileSync(fullPath, jsonData);
-    console.log(`Successfully wrote data to temporary file: ${fullPath}`);
+    if (fs.existsSync(fullPath)) {
+      console.log(`Detected pre-existing args file: ${fullPath}`);
+      fs.unlinkSync(fullPath);
+      console.log(`Successfully removed old args file`);
+    }
+    fs.writeFileSync(fullPath, jsonData); // attempt write of new config
+    console.log(`Successfully wrote args config object to: ${fullPath}`);
   } catch (err) {
-    console.error(`Error writing file: ${err.message}`);
-    // If writing fails, we still want to set up the cleanup to be safe
+    console.error(`Error handling args config file: ${err.message}`);
   }
 
-  // Set up the cleanup function to be called on process exit
+  // Cleanup function to be called on process exit
   process.on('exit', () => {
     try {
       if (fs.existsSync(fullPath)) {
@@ -30,14 +33,14 @@ function writeArgsFile(filePath, data) {
         console.log(`Successfully removed temporary file: ${fullPath}`);
       }
     } catch (err) {
-      console.error(`Error deleting file on exit: ${err.message}`);
+      console.error(`Error deleting args file on exit: ${err.message}`);
     }
   });
 
   // Handle uncaught exceptions to ensure cleanup is attempted
   process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
-    process.exit(1); // Exit with a failure code
+    process.exit(1);
   });
 }
 

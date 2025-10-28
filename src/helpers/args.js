@@ -1,31 +1,8 @@
-//const logger = require('./logger.js');
-
-//const { parsed } = require("yargs");
-
-//import { parse } from "yargs";
-
 const fs = require('fs');
+const path = require('path');
 
-// lib/args.js
-
-//const Logger = require('./lib/logger.js');
-//const logger = new Logger(false); // Default boolean to enable debug logs
-
-// export let verboseEnabled = true|false;
-
-//let devicePath = "/dev/usb/hiddev0"; // Default path if not overridden with opt.
-
-function saveOptsConfig(configPath, payload) {
-  try {
-    fs.writeFileSync(configPath, JSON.stringify(payload, null, 2));
-    console.log('runtime configuration saved to:', configPath);
-    console.log(payload);
-    return configPath;
-  } catch (err) {
-    console.error('Failed to write configuration file:', err);
-    process.exit(1);
-  }
-}
+const { writeArgsFile } = require(path.join(__dirname, '../services/args-file-service.js'));
+const configPath = path.join(__dirname, '../config/.runtime-args.json');
 
 /**
  * @desc Parse command-line arguments to extract UPS device path if provided.
@@ -38,71 +15,72 @@ function saveOptsConfig(configPath, payload) {
  * @returns {object} The object containing parsed arguments.
  */
 function evalArgs(args, devicePath, opts) {
+  let debugEnabled = false;
+  let prettyEnabled = false;
+  let onceModeEnabled;
+
   //const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--debug' || args[i] === '-d') {
-    var debugEnabled = true;
-    //const debugEnabled = true;
-    //logger.debug('Verbose mode enabled.');
-  } else if (args[i] === '--pretty' || args[i] === '-p') {
-    var prettyEnabled = true;
-    //const prettyEnabled = true;
-    //logger.debug('Pretty print enabled.');
-  } else if (args[i] === '--device' || args[i] === '-d') {
-    if (i + 1 < args.length) {
-      devicePath = args[i + 1].toLowerCase();
-      //logger.debug('Device path set to:', devicePath);
-    } else {
-      console.error('No device path provided after --device or -d flag.');
-      process.exit(1);
-    };
-  } else if (args[i] === '--mode' || args[i] === '-m') {
-    if (i + 1 < args.length) {
-      const mode = args[i + 1].toLowerCase();
-      var onceModeEnabled = true; // default to once
-      if (mode === 'once') {
-        // noop since default is already true
-      } else if (mode === 'stream') {
-        onceModeEnabled = false;
+    if (args[i] === '--debug' || args[i] === '-d') {
+      debugEnabled = true;
+      //logger.debug('Verbose mode enabled.');
+    } else if (args[i] === '--pretty' || args[i] === '-p') {
+      prettyEnabled = true;
+      //logger.debug('Pretty print enabled.');
+    } else if (args[i] === '--device' || args[i] === '-d') {
+      if (i + 1 < args.length) {
+        devicePath = args[i + 1].toLowerCase();
+        //logger.debug('Device path set to:', devicePath);
       } else {
-        console.error('Invalid mode. Use "once" or "stream".');
+        console.error('No device path provided after --device or -d flag.');
         process.exit(1);
       };
-    } else {
-      console.error('No mode provided after --mode or -m flag.');
-      process.exit(1);
+    } else if (args[i] === '--mode' || args[i] === '-m') {
+      if (i + 1 < args.length) {
+        const mode = args[i + 1].toLowerCase();
+        onceModeEnabled = true; // default to once
+        if (mode === 'once') {
+          // noop since default is already true
+        } else if (mode === 'stream') {
+          onceModeEnabled = false;
+        } else {
+          console.error('Invalid mode. Use "once" or "stream".');
+          process.exit(1);
+        };
+      } else {
+        console.error('No mode provided after --mode or -m flag.');
+        process.exit(1);
+      };
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log('Usage: node read-ups.js [--mode <once|stream>] [--device </path/to/dev>] [--verbose] [--pretty]');
+      process.exit(0);
     };
-  } else if (args[i] === '--help' || args[i] === '-h') {
-    console.log('Usage: node read-ups.js [--mode <once|stream>] [--device </path/to/dev>] [--verbose] [--pretty]');
-    process.exit(0);
   };
-};
 
-  opts.debugEnabled = debugEnabled || false;
-  opts.prettyEnabled = prettyEnabled || false;
-  opts.onceModeEnabled = onceModeEnabled || false;
-  opts.devicePath = devicePath || "/dev/usb/hiddev0";
-
-  const parsedOpts = {
-    debugEnabled: opts.debugEnabled,
-    prettyEnabled: opts.prettyEnabled,
-    onceModeEnabled: opts.onceModeEnabled,
-    devicePath: opts.devicePath
+  opts = {
+    debugEnabled: debugEnabled,
+    prettyEnabled: prettyEnabled,
+    onceModeEnabled: onceModeEnabled,
+    devicePath: devicePath
   };
 
   if (opts.debugEnabled) {
-    console.log('Parsed options:', parsedOpts);
-    //logger.debug('Parsed options:', parsedOpts);
+    console.log('Parsed options:', opts);
+    //logger.debug('Parsed options:', opts);
   }
 
-  const configPath = './../src/config/runtime.opts.json'
-  saveOptsConfig(configPath, parsedOpts)
+  writeArgsFile(configPath, opts);
 
-  return parsedOpts;
-}
+  fs.readFile(configPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log('File contents:', data);
+  });
 
-
-
+  return;
+};
 
 module.exports = {
     evalArgs

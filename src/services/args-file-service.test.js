@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 
 const { writeArgsFile } = require('./tmp-file-writer.js');
