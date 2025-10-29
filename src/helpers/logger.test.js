@@ -12,7 +12,7 @@ describe('helpers/logger.js', () => {
   beforeEach(() => {
     /**
      * @note The common `spyOn(console, 'log')` method does not work with
-     *       atleast the winston logger in conjuction with Jest. Apperently
+     *       at least the winston logger in conjunction with Jest. Apparently
      *       this is due to the custom Console Implementation as mentioned
      *       in: @see https://github.com/jestjs/jest/issues/9984 
      */

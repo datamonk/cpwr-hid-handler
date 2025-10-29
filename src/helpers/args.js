@@ -57,27 +57,34 @@ function evalArgs(args, devicePath, opts) {
     };
   };
 
-  opts = {
+  //opts = {
+  //  debugEnabled: debugEnabled,
+  //  prettyEnabled: prettyEnabled,
+  //  onceModeEnabled: onceModeEnabled,
+  //  devicePath: devicePath
+  //};
+  opts = JSON.parse({
     debugEnabled: debugEnabled,
     prettyEnabled: prettyEnabled,
     onceModeEnabled: onceModeEnabled,
     devicePath: devicePath
-  };
+  });
 
   if (opts.debugEnabled) {
     console.log('Parsed options:', opts);
     //logger.debug('Parsed options:', opts);
   }
 
-  writeArgsFile(configPath, opts);
-
-  fs.readFileSync(configPath, 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log('File contents:', data);
-  });
+  //writeArgsFile(configPath, opts);
+  
+  
+  //fs.readFileSync(configPath, 'utf8', (err, data) => {
+  //  if (err) {
+  //    console.error(err);
+  //    return;
+  //  }
+  //  console.log('File contents:', data);
+  //});
 
   return;
 };
