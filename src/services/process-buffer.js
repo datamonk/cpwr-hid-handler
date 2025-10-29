@@ -1,17 +1,5 @@
 const logger = require('../helpers/logger.js');
 
-//const { deriveChargeStatus } = require('../services/charge-status-service.js');
-//const parseUsage = require('../services/parse-usage.js');
-//const { deriveChargeStatus } = require('../services/derive-charge-status.js');
-
-function splitBufferToChunks(buffer, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < buffer.length; i += chunkSize) {
-    chunks.push(buffer.slice(i, i + chunkSize));
-  };
-  return chunks;
-};
-
 function parseUsage(usageId, buffer, output) {
   if (buffer.length < 8) {
     logger.debug(`Ignoring short/malformed report for Usage ID ${usageId}: ${buffer.length} bytes`);
@@ -73,4 +61,4 @@ function parseUsage(usageId, buffer, output) {
   };
 };
 
-module.exports = { parseUsage, splitBufferToChunks };
+module.exports = { parseUsage };

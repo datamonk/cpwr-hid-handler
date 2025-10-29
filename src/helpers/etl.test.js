@@ -11,34 +11,48 @@ describe('helpers/etl.js', () => {
   afterEach(() => { //
   });
 
-  describe.skip('JSONstringifyRaw(): todo', () => {
+  describe.todo('JSONstringifyRaw(): todo', () => {
     const { JSONstringifyRaw } = require('./etl.js');
 
-    test.skip('placeholder test', () => {
+    test.todo('placeholder test', () => {
       expect(true).toBe(true);
     });
   });
 
-  describe.skip('JSONstringifyHex(): todo', () => {
+  describe.todo('JSONstringifyHex(): todo', () => {
     const { JSONstringifyHex } = require('./etl.js');
 
-    test.skip('placeholder test', () => {
+    test.todo('placeholder test', () => {
       expect(true).toBe(true);
     });
   });
 
-  describe.skip('splitBufferIntoChunks(): todo', () => {
+  describe.todo('splitBufferIntoChunks(): todo', () => {
     const { splitBufferIntoChunks } = require('./etl.js');
 
-    test.skip('placeholder test', () => {
+    test.todo('placeholder test', () => {
       expect(true).toBe(true);
     });
   });
 
-  describe.skip('sortObjectElements(): todo', () => {
+    describe('splitBufferToChunks(): Split raw buffer event to 8 byte chunks', () => {
+    const { splitBufferIntoChunks } = require('./etl.js');
+    
+    test('should split 16 byte len buffer payload to two 8 byte chunks', () => {
+      const buf = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                               0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10]);
+      const chunks = splitBufferIntoChunks(buf, 8);
+      expect(chunks.length).toBe(2);
+      expect(chunks[0]).toEqual(Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]));
+      expect(chunks[1]).toEqual(Buffer.from([0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10]));
+    });
+
+  });
+
+  describe.todo('sortObjectElements(): todo', () => {
     const { sortObjectElements } = require('./etl.js');
 
-    test.skip('placeholder test', () => {
+    test.todo('placeholder test', () => {
       expect(true).toBe(true);
     });
   });

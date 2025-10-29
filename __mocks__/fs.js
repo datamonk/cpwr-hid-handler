@@ -2,7 +2,7 @@
 
 const path = require('path');
 const mockFiles = Object.create(null);
-const fs = jest.genMockFromModule('fs');
+const fs = jest.createMockFromModule('fs');
 
 fs.writeFileSync = jest.fn((filepath, data) => {
   mockFiles[filepath] = data;

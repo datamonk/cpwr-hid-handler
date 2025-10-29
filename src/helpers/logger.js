@@ -24,7 +24,6 @@ fs.readFile(configPath, 'utf8', (err, obj) => {
   }
 });
 
-// Define custom log levels
 const logLevels = {
   fatal: 0,
   error: 1,

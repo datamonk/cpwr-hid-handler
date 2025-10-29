@@ -10,7 +10,7 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 
 /** @ref https://github.com/nrwl/nx/issues/812 */
-const esModules = ['yargs', 'yargs-parser'].join('|');
+const esModules = ['fs', 'yargs', 'yargs-parser'].join('|');
 
 const config = {
   verbose: true,
@@ -40,6 +40,7 @@ const config = {
   },
   moduleNameMapper: {
     "^node-hid$": "<rootDir>/__mocks__/node-hid.js",
+    "^fs$": "<rootDir>/__mocks__/fs.js",
     //"^yargs$": "<rootDir>/__mocks__/yargs.js",
   },
 };

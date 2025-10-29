@@ -1,34 +1,14 @@
-const { evalArgs } = require('./args.js');
 const logger = require('./logger.js');
 
 //const _ = require('lodash');
 
-//jest.mock('yargs');
-//jest.mock('yargs/helpers');
-
-/*
-// Mock yargs and hideBin
-jest.mock('yargs', () => {
-  const mYargs = jest.fn(() => ({
-    option: jest.fn().mockReturnThis(), // Allow chaining of .option()
-    parse: jest.fn(() => ({ verbose: false })), // Default mock return for .parse()
-  }));
-  return mYargs;
-});
-
-jest.mock('yargs/helpers', () => ({
-  hideBin: jest.fn((args) => args.slice(2)), // Mock hideBin to return a sliced array
-}));
-*/
-
-describe('log levels', () => {
+describe('helpers/logger.js', () => {
   let consoleSpy;
-  //let logger;
 
   beforeAll(() => {
-    //logger = require('./logger.js'); // Import logger after mocking yargs
   });
-
+  afterAll(() => { //
+  });
   beforeEach(() => {
     /**
      * @note The common `spyOn(console, 'log')` method does not work with
@@ -64,12 +44,11 @@ describe('log levels', () => {
     });
     */
   });
-
   afterEach(() => {
     consoleSpy.mockRestore();
   });
   
-  test('should log info messages to console', () => {
+  test('logger(): should log info messages to console', () => {
     //logger.info('This is an info message');
     //const result = logger.info('This is an info message');
     //expect(consoleSpy).toHaveBeenCalled();
@@ -80,23 +59,21 @@ describe('log levels', () => {
     logger.info('This is an info message');
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('info: This is an info message'));
-    
-    
   });
 
-  test('should log warn messages to console', () => {
+  test('logger(): should log warn messages to console', () => {
     logger.warn('This is a warning message');
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('warn: This is a warning message'));
   });
 
-  test('should not log debug messages if level is info', () => {
+  test('logger(): should not log debug messages if level is info', () => {
     logger.debug('This is a debug message');
     expect(consoleSpy).toHaveBeenCalledTimes(0);
     expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('debug: This is a debug message'));
   });
 
-  test('should log error messages to console', () => {
+  test('logger(): should log error messages to console', () => {
     logger.error('This is an error message');
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('error: This is an error message'));
