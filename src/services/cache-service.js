@@ -23,7 +23,7 @@ class CacheService extends EventEmitter {
     this.ttl = new Map();
   };
 
-  async fsGet(key) {
+  async readFs(key) {
     try {
       const fileContent = await fs.readFile(configPath, 'utf8');
       const fileData = JSON.parse(fileContent);
@@ -34,11 +34,11 @@ class CacheService extends EventEmitter {
     };
   };
 
-  async readConfig(key, ttlValue) {
+  async getConfig(key, ttlValue) {
     if (this.data.has(key)) {
       return this.data.get(key);
     } else {
-      let data = await this.fsGet(key); // Cache miss, grab content from file
+      let data = await this.readFs(key); // Cache miss, grab content from file
       this.data.set(key, data);
       this.ttl.set(key, ttlValue);  // Set TTL [Optional]
       setTimeout(() => this.data.delete(key), ttlValue);
@@ -57,7 +57,7 @@ class CacheService extends EventEmitter {
     };
   };
 
-  async readArgs(key) {
+  async getArgs(key) {
     if (this.data.has(key)) {
       return this.data.get(key);
     } else {

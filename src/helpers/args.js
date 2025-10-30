@@ -1,8 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+//const fs = require('fs');
+//const path = require('path');
+//const { writeArgsFile } = require(path.join(__dirname, '../services/args-file-service.js'));
+//const configPath = path.join(__dirname, '../config/.runtime-args.json');
 
-const { writeArgsFile } = require(path.join(__dirname, '../services/args-file-service.js'));
-const configPath = path.join(__dirname, '../config/.runtime-args.json');
+const { CacheService } = require('../services/cache-service.js');
+const cache = new CacheService();
+
+async function cacheArgs(argsObj) {
+  
+  await cache.setArgs('args', argsObj, 5000);
+  const argsFromCache = await cache.getArgs('args');
+  
+  console.log('args cached:', argsFromCache);
+  return argsFromCache;
+};
 
 /**
  * @desc Parse command-line arguments to extract UPS device path if provided.
@@ -64,22 +75,12 @@ function evalArgs(args, devicePath, opts) {
     devicePath: devicePath
   };
 
-  if (opts.debugEnabled) {
-    console.log('Parsed options:', opts);
+  //if (opts.debugEnabled) {
+  //  console.log('Parsed options:', opts);
     //logger.debug('Parsed options:', opts);
-  }
+  //}
 
-  //writeArgsFile(configPath, opts);
-  
-  
-  //fs.readFileSync(configPath, 'utf8', (err, data) => {
-  //  if (err) {
-  //    console.error(err);
-  //    return;
-  //  }
-  //  console.log('File contents:', data);
-  //});
-
+  cacheArgs(opts);
   return;
 };
 

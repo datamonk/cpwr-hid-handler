@@ -16,7 +16,7 @@ const config = {
   verbose: true,
   bail: 1,
   setupFilesAfterEnv: [
-    './jest.setup.js'
+    "<rootDir>/jest.setup.js"
   ],
   displayName: {
     color: 'blue',

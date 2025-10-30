@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dotenv": "^17.2.3",
     "node-hid": "^3.2.0",
     "winston": "^3.18.3"
   },
@@ -26,7 +27,7 @@
   },
   "scripts": {
     "read-ups": "node read-ups.js",
-    "test": "jest --config jest.config.js"
+    "test": "jest --detectOpenHandles --expand --forceExit --color --config jest.config.js"
   },
   "repository": {
     "type": "git",

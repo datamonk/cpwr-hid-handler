@@ -1,28 +1,31 @@
 const winston = require('winston');
-const { combine, timestamp, colorize, errors, printf } = winston.format;
-const path = require('path');
-const fs = require('fs');
+//const { combine, timestamp, colorize, errors, printf } = winston.format;
 
-const configPath = path.join(__dirname, '../config/.runtime-args.json');
+const { CacheService } = require('../services/cache-service.js');
+const cache = new CacheService();
 
-let showDebug;
-let logLevel;
+let logLevel
 
-fs.readFile(configPath, 'utf8', (err, obj) => {
-  if (err) {
-    console.error('Error reading JSON file:', err);
-    return;
-  }
+(async function setLogLevel() {
+  let args = await cache.getArgs('args');
+  //let args = cache.getArgs('args');
+  const isDebug = args.debugEnabled;
+  logLevel = isDebug ? 'debug' : 'info'; 
+  console.log('Log Level is:', logLevel);
+  console.log('debug bool is:', args.debugEnabled);
+})();
 
-  try {
-    const config = JSON.parse(obj);
-    console.log(config.debugEnabled);
-    showDebug = config.debugEnabled || false;
-    logLevel = showDebug ? 'debug' : 'info';
-  } catch (err) {
-    console.error('Error parsing JSON data:', err);
-  }
-});
+/**
+ * @see https://github.com/winstonjs/winston/blob/master/examples/custom-levels.js
+ */
+
+/**
+ * The SyntaxError: Unexpected token '||=' in Node.js indicates that the
+ * version of Node.js being used does not support the logical OR assignment 
+ * operator (||=). This operator, along with logical AND assignment (&&=) 
+ * and nullish coalescing assignment (??=), was introduced in ECMAScript 2021 
+ * (ES2021).
+ */
 
 const logLevels = {
   fatal: 0,
@@ -34,21 +37,51 @@ const logLevels = {
 };
 
 const logger = winston.createLogger({
-  levels: logLevels,
-  level: logLevel, // Set the log level dynamically
-  format: combine(
+  //levels: logLevels,
+  //level: logLevel || 'info',
+  level: 'info',
+  //format: combine(
   //  colorize(),
-    errors({ stack: true }),
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
-  ),
-  //format: winston.format.simple(),
+  //  errors({ stack: true }),
+  //  timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  //  printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+  //),
+  format: winston.format.simple(),
   transports: [
     new winston.transports.Console()
   ],
 });
 
-module.exports = logger;
+module.exports = {
+  logger
+};
+
+/*
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+});
+*/
+
+//logger.info('This is an info message');
+//logger.warn('This is a warning message');
+//logger.debug('This is a debug message');
+//logger.error('This is an error message');
+
+/**
+  const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+  exceptionHandlers: [
+    new winston.transports.File({ filename: 'exception.log' }),
+  ],
+  rejectionHandlers: [
+    new winston.transports.File({ filename: 'rejections.log' }),
+  ],
+});
+ */
 
 /**
  * npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported

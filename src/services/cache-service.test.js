@@ -2,11 +2,11 @@ const { CacheService } = require('./cache-service.js');
 const cache = new CacheService();
 
 (async function configTest() {
-    let confUno = await cache.readConfig('config', 5000);
-    console.log('config object [set from file; cache miss]:', confUno);
+    let readConfigUno = await cache.getConfig('config', 5000);
+    console.log('config object [set from file; cache miss]:', readConfigUno);
 
-    let confDos = await cache.readConfig('config', 5000);
-    console.log('config object [get; cache hit]:', confDos);
+    let readConfigDos = await cache.getConfig('config', 5000);
+    console.log('config object [get; cache hit]:', readConfigDos);
 
     /**
      * @output
@@ -36,11 +36,11 @@ const cache = new CacheService();
     devicePath: "/dev/usb/hiddev0"
   };
 
-  let newArgs = await cache.setArgs('args', cannedArgs, 5000);
-  console.log('args object [set; cache null]:', newArgs);
+  let writeArgs = await cache.setArgs('args', cannedArgs, 5000);
+  console.log('args object [set; cache null]:', writeArgs);
 
-  let getArgs = await cache.readArgs('args');
-  console.log('args object [get; cache hit]:', getArgs);
+  let readArgs = await cache.getArgs('args');
+  console.log('args object [get; cache hit]:', readArgs);
   
   /**
    * @output
@@ -52,7 +52,7 @@ const cache = new CacheService();
    * }
    */
 
-  console.log('parsed debug boolean:', getArgs.debugEnabled);
+  console.log('parsed debug boolean:', readArgs.debugEnabled);
   // parsed debug boolean: true
   
   })();
