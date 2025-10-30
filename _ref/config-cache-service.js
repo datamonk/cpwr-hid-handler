@@ -13,11 +13,12 @@
 
 const NodeCache = require('node-cache');
 const fs = require('fs/promises'); // Using promises for async file operations
+const path = require('path');
 
 const myCache = new NodeCache({ stdTTL: 60 }); // Cache items expire after 60 seconds
 //const flatFilePath = 'data.json'; // Your flat file
 //const configPath = path.join(__dirname, '../config/.runtime-args.json');
-const { config } = require('../config/config.js')
+const { config } = require('../src/config/config.js');
 
 async function getFromCacheOrFile(key) {
     let data = myCache.get(key); // Try to get from cache
@@ -35,7 +36,7 @@ async function getFromCacheOrFile(key) {
         // Assuming your flat file is an object where keys match cache keys
         //data = fileData[key];
 
-        const { appConfig } = require('../config/config.js')
+        const { appConfig } = require('../src/config/config.js')
         const objData = JSON.parse(appConfig);
         data = objData[key];
 

@@ -57,18 +57,12 @@ function evalArgs(args, devicePath, opts) {
     };
   };
 
-  //opts = {
-  //  debugEnabled: debugEnabled,
-  //  prettyEnabled: prettyEnabled,
-  //  onceModeEnabled: onceModeEnabled,
-  //  devicePath: devicePath
-  //};
-  opts = JSON.parse({
+  opts = {
     debugEnabled: debugEnabled,
     prettyEnabled: prettyEnabled,
     onceModeEnabled: onceModeEnabled,
     devicePath: devicePath
-  });
+  };
 
   if (opts.debugEnabled) {
     console.log('Parsed options:', opts);
