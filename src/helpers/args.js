@@ -1,17 +1,11 @@
-//const fs = require('fs');
-//const path = require('path');
-//const { writeArgsFile } = require(path.join(__dirname, '../services/args-file-service.js'));
-//const configPath = path.join(__dirname, '../config/.runtime-args.json');
-
-const { CacheService } = require('../services/cache-service.js');
-const cache = new CacheService();
+const cache = require('../services/cache-service.js');
 
 async function cacheArgs(argsObj) {
-  
-  await cache.setArgs('args', argsObj, 5000);
+  //cache.setArgs('args', argsObj, 10000);
+  cache.setArgs('args', argsObj, null);
   const argsFromCache = await cache.getArgs('args');
   
-  console.log('args cached:', argsFromCache);
+  //console.log('args cached:', argsFromCache);
   return argsFromCache;
 };
 
@@ -25,23 +19,20 @@ async function cacheArgs(argsObj) {
  * @param {object} opts - The empty object to store parsed arguments.
  * @returns {object} The object containing parsed arguments.
  */
-function evalArgs(args, devicePath, opts) {
+async function evalArgs(args, devicePath, opts) {
   let debugEnabled = false;
   let prettyEnabled = false;
-  let onceModeEnabled;
+  let onceModeEnabled = true;
 
   //const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--debug' || args[i] === '-d') {
       debugEnabled = true;
-      //logger.debug('Verbose mode enabled.');
     } else if (args[i] === '--pretty' || args[i] === '-p') {
       prettyEnabled = true;
-      //logger.debug('Pretty print enabled.');
     } else if (args[i] === '--device' || args[i] === '-d') {
       if (i + 1 < args.length) {
         devicePath = args[i + 1].toLowerCase();
-        //logger.debug('Device path set to:', devicePath);
       } else {
         console.error('No device path provided after --device or -d flag.');
         process.exit(1);
@@ -75,12 +66,7 @@ function evalArgs(args, devicePath, opts) {
     devicePath: devicePath
   };
 
-  //if (opts.debugEnabled) {
-  //  console.log('Parsed options:', opts);
-    //logger.debug('Parsed options:', opts);
-  //}
-
-  cacheArgs(opts);
+  await cacheArgs(opts);
   return;
 };
 

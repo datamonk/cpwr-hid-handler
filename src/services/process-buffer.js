@@ -1,8 +1,8 @@
-const logger = require('../helpers/logger.js');
+//const logger = require('../helpers/logger.js');
 
 function parseUsage(usageId, buffer, output) {
   if (buffer.length < 8) {
-    logger.debug(`Ignoring short/malformed report for Usage ID ${usageId}: ${buffer.length} bytes`);
+    //logger.debug(`Ignoring short/malformed report for Usage ID ${usageId}: ${buffer.length} bytes`);
     return; // Ignore short or malformed reports
   };
   

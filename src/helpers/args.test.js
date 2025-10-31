@@ -1,4 +1,4 @@
-//const { evalArgs } = require('./args.js');
+
 
 describe('helpers/args.js', () => {
 
@@ -19,7 +19,7 @@ describe('helpers/args.js', () => {
       const devicePath = "/dev/usb/hiddev0";
       const opts = {};
       const result = evalArgs(args, devicePath, opts);
-      expect(result).toEqual({
+      expect(result).toContain({
         debugEnabled: false,
         prettyEnabled: false,
         onceModeEnabled: false,
@@ -31,13 +31,22 @@ describe('helpers/args.js', () => {
       const args = ['--debug', '--pretty'];
       const devicePath = "/dev/usb/hiddev0";
       const opts = {};
-      const result = evalArgs(args, devicePath, opts); 
+      const result = evalArgs(args, devicePath, opts);
+      expect(result).toBeObject();
+      expect(result).toContainAllEntries([
+        ['debugEnabled','true'],
+        ['prettyEnabled','true'],
+        ['onceModeEnabled','false'],
+        ['devicePath','/dev/usb/hiddev0']
+      ]);
+      /*
       expect(result).toEqual({
         debugEnabled: true,
         prettyEnabled: true,
         onceModeEnabled: false,
         devicePath: "/dev/usb/hiddev0"
       });
+      */
     });
 
     test('set device path and once mode', () => {

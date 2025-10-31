@@ -1,5 +1,4 @@
-const { CacheService } = require('./cache-service.js');
-const cache = new CacheService();
+const cache = require('./cache-service.js');
 
 (async function configTest() {
     let readConfigUno = await cache.getConfig('config', 5000);
@@ -54,5 +53,5 @@ const cache = new CacheService();
 
   console.log('parsed debug boolean:', readArgs.debugEnabled);
   // parsed debug boolean: true
-  
+
   })();

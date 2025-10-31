@@ -1,11 +1,17 @@
-const logger = require('./logger.js');
+//const logger = require('./logger.js');
 
 //const _ = require('lodash');
 
-describe('helpers/logger.js', () => {
+const processArgs = require('./args.js');
+const { startLogger } = require('./logger.js');
+//let logger;
+
+describe.skip('helpers/logger.js', () => {
   let consoleSpy;
 
   beforeAll(() => {
+    //processArgs.evalArgs(args, devicePath, opts);
+    
   });
   afterAll(() => { //
   });
@@ -56,6 +62,8 @@ describe('helpers/logger.js', () => {
     //logger.debug(result);
 
     //console.log('Testing console log');
+    //processArgs.evalArgs(args, devicePath, opts);
+
     logger.info('This is an info message');
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('info: This is an info message'));

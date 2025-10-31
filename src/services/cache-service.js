@@ -1,20 +1,12 @@
-
-/**
- * @note Read through caching is a method where the cache itself is responsible
- *       for both serving data and populating itself when it encounters a cache
- *       miss. When a client requests data, it queries the cache. If the data
- *       isn't in the cache (a cache miss), the cache retrieves the data from 
- *       the primary data store and then serves it to the client, ensuring it's
- *       also saved in the cache for subsequent requests.
- * 
- * @see https://www.techlivened.com/implementing-caching-in-node-js
- */
-
 const EventEmitter = require('events');
 const fs = require('fs/promises');
 const path = require('path');
 
 const configPath = path.join(__dirname, '../config/config.json');
+
+/**
+ * @see https://www.techlivened.com/implementing-caching-in-node-js
+ */
 
 class CacheService extends EventEmitter {
   constructor() {
@@ -61,13 +53,17 @@ class CacheService extends EventEmitter {
     if (this.data.has(key)) {
       return this.data.get(key);
     } else {
-      console.error('The cached args obj does not exist.', error);
+      console.error('The cached args obj does not exist.', key);
       return null;
     };
   };
 
 };
 
-module.exports = {
-    CacheService
-};
+/**
+ * @note The below syntax exports a single instance of the CacheService class
+ *       which is critical for the caching service to work correctly with a
+ *       global context.
+ */
+module.exports = new CacheService();
+
