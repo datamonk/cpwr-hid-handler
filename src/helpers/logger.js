@@ -5,6 +5,9 @@ const cache = require('../services/cache-service.js');
 
 /**
  * @see https://github.com/winstonjs/winston/blob/master/examples/custom-levels.js
+ * 
+ * @note ref the below to build a slim logger
+ * @see https://github.com/datamonk/carryoptics.io/blob/dev/lib/logger.js
  */
 
 const config = {
@@ -64,8 +67,9 @@ class Logger {
     winston.addColors(config.colors);
 
     this.logger = winston.createLogger({
-      level: ll || 'info',
+      //level: ll || 'info',
       //level: 'trace',
+      level: 'debug',
       levels: config.levels,
       format: combine(
         colorize(),

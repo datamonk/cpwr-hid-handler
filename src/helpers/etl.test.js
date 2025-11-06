@@ -1,4 +1,3 @@
-//const etl = require('./etl.js');
 
 describe('helpers/etl.js', () => {
 
@@ -11,31 +10,33 @@ describe('helpers/etl.js', () => {
   afterEach(() => { //
   });
 
-  describe.todo('JSONstringifyRaw(): todo', () => {
+  test(`should return length match for expected etl.js function exports`, () => {
+    const etl = require('./etl.js');
+    const len = Object.keys(etl).length;
+    expect(len).toBe(4);
+  });
+
+  describe('JSONstringifyRaw(): Conversion of buffer in decimal format to raw str', () => {
     const { JSONstringifyRaw } = require('./etl.js');
 
-    test.todo('placeholder test', () => {
-      expect(true).toBe(true);
+    test('should convert decimal buffer str', () => {
+      const buf = Buffer.from("01 02 03 04 05 06 07 08");
+      const result = Buffer.from("<Buffer 01 02 03 04 05 06 07 08 >");
+      expect(JSONstringifyRaw(buf)).toEqual(result);
     });
   });
 
-  describe.todo('JSONstringifyHex(): todo', () => {
+  describe('JSONstringifyHex(): Conversion of buffer in decimal format to hex str', () => {
     const { JSONstringifyHex } = require('./etl.js');
-
-    test.todo('placeholder test', () => {
-      expect(true).toBe(true);
+    
+    test('should convert decimal buffer array to hex str', () => {
+      const buf = Buffer.from("01 02 03 04 05 06 07 08");
+      const result = Buffer.from("[0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]");
+      expect(JSONstringifyHex(buf)).toEqual(result);
     });
   });
 
-  describe.todo('splitBufferIntoChunks(): todo', () => {
-    const { splitBufferIntoChunks } = require('./etl.js');
-
-    test.todo('placeholder test', () => {
-      expect(true).toBe(true);
-    });
-  });
-
-    describe('splitBufferToChunks(): Split raw buffer event to 8 byte chunks', () => {
+  describe('splitBufferToChunks(): Split raw buffer event to 8 byte chunks', () => {
     const { splitBufferIntoChunks } = require('./etl.js');
     
     test('should split 16 byte len buffer payload to two 8 byte chunks', () => {
@@ -49,11 +50,31 @@ describe('helpers/etl.js', () => {
 
   });
 
-  describe.todo('sortObjectElements(): todo', () => {
+  describe('sortObjectElements(): Sort JSON obj elements based on static key array', () => {
     const { sortObjectElements } = require('./etl.js');
 
-    test.todo('placeholder test', () => {
-      expect(true).toBe(true);
+    test('should re-order unsorted object to correct element positions', () => {
+      const keyOrder = [
+        'ts', 'path', 'batteryPercentage', 'acPresent', 'runTimeToEmpty', 'chargeStatus'
+      ];
+      const unsortedInput = {
+        "path": "/dev/usb/hiddev0",
+        "batteryPercentage": 100,
+        "ts": 1760837972,
+        "acPresent": true,
+        "chargeStatus": "fully-charged",
+        "runTimeToEmpty": 40
+     };
+      const sortedOutput = {
+          "ts": 1760837972,
+          "path": "/dev/usb/hiddev0",
+          "batteryPercentage": 100,
+          "acPresent": true,
+          "runTimeToEmpty": 40,
+          "chargeStatus": "fully-charged"
+      };
+      const result = sortObjectElements(unsortedInput, keyOrder);
+      expect(result).toEqual(sortedOutput);
     });
   });
 

@@ -32,13 +32,15 @@ describe('helpers/args.js', () => {
       const devicePath = "/dev/usb/hiddev0";
       const opts = {};
       const result = evalArgs(args, devicePath, opts);
-      expect(result).toBeObject();
+      //expect(result).toBeObject();
+      /*
       expect(result).toContainAllEntries([
         ['debugEnabled','true'],
         ['prettyEnabled','true'],
         ['onceModeEnabled','false'],
         ['devicePath','/dev/usb/hiddev0']
       ]);
+      */
       /*
       expect(result).toEqual({
         debugEnabled: true,
@@ -47,6 +49,12 @@ describe('helpers/args.js', () => {
         devicePath: "/dev/usb/hiddev0"
       });
       */
+      expect(result).toContain({
+        debugEnabled: true,
+        prettyEnabled: true,
+        onceModeEnabled: false,
+        devicePath: "/dev/usb/hiddev0"
+      });
     });
 
     test('set device path and once mode', () => {

@@ -19,7 +19,7 @@
   "version": "1.0.0",
   "main": "read-ups.js",
   "engines": {
-    "node": ">=18.20.8 <24.10.0"
+    "node": ">=18.20.8"
   },
   "directories": {
     "doc": "docs",

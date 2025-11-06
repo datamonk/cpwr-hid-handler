@@ -1,4 +1,3 @@
-//const col = require('yoctocolors');
 
 var JSONstringifyRaw = function(arr) {
   const { magentaBright } = require('yoctocolors');
@@ -11,6 +10,7 @@ var JSONstringifyRaw = function(arr) {
   str = magentaBright(str);
   return str;
 };
+// ${JSONstringifyRaw(chunk)}
 
 var JSONstringifyHex = function(arr) {
   const { cyanBright } = require('yoctocolors');
@@ -23,6 +23,7 @@ var JSONstringifyHex = function(arr) {
   str = cyanBright(str);
   return str;
 };
+// ${JSONstringifyHex(chunk)}
 
 function splitBufferIntoChunks(buffer, chunkSize) {
   const chunks = [];
