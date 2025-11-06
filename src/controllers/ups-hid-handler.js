@@ -1,16 +1,17 @@
-// src/ups-handler.js
-
 const HID = require('node-hid');
 const col = require('yoctocolors'); 
 
 const EventEmitter = require('events');
 const ee = new EventEmitter();
 
-const { Logger } = require('../../lib/logger.js');
-const logger = new Logger(false); // Default boolean to enable debug logs
+//const { Logger } = require('../../lib/logger.js');
+//const logger = new Logger(false); // Default boolean to enable debug logs
 
-const { splitBufferIntoChunks, JSONstringifyRaw, JSONstringifyHex } = require('../lib/common.js');
-const { parseHidData } = require('../ups-hid-parser.js');
+const logger = require('../helpers/logger.js');
+
+const { splitBufferIntoChunks, JSONstringifyRaw, JSONstringifyHex, sortObjectElements } = require('../lib/etl.js');
+const { parseUsage } = require('../services/ups-hid-parser.js');
+//const { parseHidData } = require('../ups-hid-parser.js');
 
 /**
  * @desc Main class to handle communication with an UPS instance via HID.
@@ -58,8 +59,12 @@ class UpsHidHandler {
         const reportIdHex = `0x${reportId.toString(16).padStart(2, '0')}`;
 
         if (this.usagesToParse.includes(reportIdHex)) {
-          parseHidData(reportIdHex, chunk, this.reportData);
+          //parseHidData(reportIdHex, chunk, this.reportData);
+          parseUsage(reportIdHex, chunk, this.reportData);
+
           ee.once('done', () => {
+            const orderedReportData = sortObjectElements(this.reportData, this.keyOrder);
+            /*
             const entries = Object.entries(this.reportData);
             entries.sort((a, b) => {
               const indexA = this.keyOrder.indexOf(a[0]);
@@ -67,7 +72,7 @@ class UpsHidHandler {
               return indexA - indexB;
             });
             const orderedReportData = Object.fromEntries(entries);
-            
+            */
             if (Object.keys(orderedReportData).length === 0) {
               // Skip empty outputs dumped to STDOUT. This will omit
               // unwanted reset emitted output.

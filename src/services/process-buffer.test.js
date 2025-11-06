@@ -1,4 +1,3 @@
-//const logger = require('../../lib/logger.js');
 
 describe('services/process-buffer.js', () => {
   

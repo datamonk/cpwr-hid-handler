@@ -92,6 +92,21 @@ Below is a modified structure based on the general standards mentioned above.
     │   └── .runtime-args.json // [ tmp file w/ runtime args object ]
 ```
 
+### Processing Workflow
+```js
+- ups-hid-handler.js
+  ├── class UpsHidHandler{}
+      ├── method connect()
+      + process-hid-data.js ( raname process-buffer.js - replaced from parseHidData function directly in `ups-hid-parser.js`)
+        ├── class ProcessHidData{}
+            ├── init config to cache (keyOrder and usagesToParse)
+            ├── init node-hid emitter for ups.on 'data'
+            ├── init ProcessingEventEmitter() (pee - done and reset states)
+            ├── method parse()
+                ├── import helper functions (splitBufferIntoChunks, sortObjectElements)
+    >
+```
+
 ### Event Emitters
 
 ```js

@@ -1,6 +1,8 @@
+//const logger = require('../lib/logger.js');
 //const col = require('yoctocolors'); 
-const logger = require('../lib/logger.js');
-const { devicePath } = require('./ups-hid-handler.js');
+
+//const { devicePath } = require('./ups-hid-handler.js');
+
 
 /**
  * Derives the charge status based on AC presence and charging states.
@@ -13,8 +15,6 @@ const { devicePath } = require('./ups-hid-handler.js');
 
 const EventEmitter = require('events');
 const ee = new EventEmitter();
-
-
 
 class UpsHidParser {
   constructor(usageId, buffer, output) {

@@ -52,6 +52,64 @@ async function startLogger() {
   return logger;
 };
 
-module.exports = {
-  startLogger
-};
+class Logger {
+  constructor() {
+    if (Logger.instance) {
+      return Logger.instance;
+    }
+    //this.logger = await initLogger();
+    this.logger = startLogger();
+    
+    Logger.instance = this;
+    return this;
+  }
+  // Expose Winston's logging methods
+  info(message) {
+    this.logger.info(message);
+  }
+  warn(message) {
+    this.logger.warn(message);
+  }
+  error(message) {
+    this.logger.error(message);
+  }
+  debug(message) {
+    this.logger.debug(message);
+  }
+
+  // You can add more methods as needed, or directly expose the logger instance
+  getLogger() {
+    return this.logger;
+  }
+
+}
+
+/** 
+ * @note ensure a single instance is exported for the Logger service.
+ */
+module.exports = new Logger();
+
+//module.exports = {
+//  startLogger
+//};
+
+/**
+ * // In file1.js
+const logger = require('./loggerService');
+
+logger.info('This is an informational message from file1.');
+logger.error('An error occurred in file1!');
+
+// In file2.js
+const logger = require('./loggerService');
+
+logger.warn('A warning from file2.');
+logger.debug('Debugging information from file2.');
+
+// You can also access the raw Winston logger if needed
+const rawWinstonLogger = logger.getLogger();
+rawWinstonLogger.log({
+    level: 'verbose',
+    message: 'This is a verbose message using the raw Winston logger.'
+});
+*/
