@@ -23,6 +23,7 @@ const config = {
     trace: 'grey'
   }
 };
+/*
 
 async function initLogger() {
   const args = await cache.getArgs('args');
@@ -51,6 +52,7 @@ async function startLogger() {
   logger.debug('Logger initialized asynchronously.');
   return logger;
 };
+*/
 
 class Logger {
   constructor() {
@@ -58,7 +60,23 @@ class Logger {
       return Logger.instance;
     }
     //this.logger = await initLogger();
-    this.logger = startLogger();
+    //this.logger = startLogger();
+    winston.addColors(config.colors);
+
+    this.logger = winston.createLogger({
+      level: ll || 'info',
+      //level: 'trace',
+      levels: config.levels,
+      format: combine(
+        colorize(),
+        errors({ stack: true }),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+      ),
+      transports: [new winston.transports.Console()],
+      exceptionHandlers: [new winston.transports.File({ filename: 'exceptions.log' })],
+      rejectionHandlers: [new winston.transports.File({ filename: 'rejections.log' })]
+    });
     
     Logger.instance = this;
     return this;
