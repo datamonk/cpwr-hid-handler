@@ -1,6 +1,11 @@
 const winston = require('winston');
 const { combine, timestamp, printf, colorize, align } = winston.format;
 
+/**
+ * @see https://devsouvik2002.medium.com/winston-logger-efficient-logging-with-in-node-js-applications-a9bb24f55cf1
+ * @see https://last9.io/blog/winston-logging-in-nodejs/
+ */
+
 class Logger {
     constructor() {
         if (Logger.instance) {
