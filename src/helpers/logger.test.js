@@ -2,11 +2,15 @@
 
 //const _ = require('lodash');
 
-const processArgs = require('./args.js');
-const { startLogger } = require('./logger.js');
+//const processArgs = require('./args.js');
+//const { startLogger } = require('./logger.js');
 //let logger;
+//const logger = require('../services/logger-service.js');
 
-describe.skip('helpers/logger.js', () => {
+const logger = require('./logger.js');
+
+//describe('services/logger-service.js', () => {
+describe('helpers/logger.js', () => {
   let consoleSpy;
 
   beforeAll(() => {

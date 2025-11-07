@@ -3,6 +3,10 @@ const { combine, timestamp, colorize, errors, printf } = winston.format;
 
 const cache = require('../services/cache-service.js');
 
+//const mkdirp = require('mkdirp');
+const { mkdirp } = require('mkdirp');
+const path = require('path');
+
 /**
  * @see https://github.com/winstonjs/winston/blob/master/examples/custom-levels.js
  * 
@@ -57,6 +61,15 @@ async function startLogger() {
 };
 */
 
+const logDir = path.join(__dirname + '/../../' + 'logs');
+//console.log(logDir);
+//mkdirpSync(logDir);
+//mkdirp(`${logDir}`).then(made =>
+//  console.log(`made directories, starting with ${made}`)
+//)
+const made = mkdirp.sync(`${logDir}`);
+console.log(`made directories, starting with ${made}`)
+
 class Logger {
   constructor() {
     if (Logger.instance) {
@@ -64,6 +77,8 @@ class Logger {
     }
     //this.logger = await initLogger();
     //this.logger = startLogger();
+    //this.logDir = path.join(__dirname + '/../../' + 'logs');
+    this.logDir = logDir;
     winston.addColors(config.colors);
 
     this.logger = winston.createLogger({
@@ -78,10 +93,38 @@ class Logger {
         printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
       ),
       transports: [new winston.transports.Console()],
-      exceptionHandlers: [new winston.transports.File({ filename: 'exceptions.log' })],
-      rejectionHandlers: [new winston.transports.File({ filename: 'rejections.log' })]
+      exceptionHandlers: [new winston.transports.File({
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: path.join(this.logDir + '/' + 'exceptions.log'),
+      })],
+      rejectionHandlers: [new winston.transports.File({
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: path.join(this.logDir + '/' + 'rejections.log'),
+      })]
+      ///exceptionHandlers: [new winston.transports.File({ filename: 'exceptions.log' })],
+      //rejectionHandlers: [new winston.transports.File({ filename: 'rejections.log' })]
     });
-    
+
+    //if (this.logDir) {
+    //  console.log(this.logDir);
+    //  mkdirpSync(this.logDir);
+      /*
+      exceptionHandlers.push(new winston.transports.File({
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: path.join(this.logDir + '/' + 'exceptions.log'),
+      }));
+
+      rejectionHandlers.push(new winston.transports.File({
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: path.join(this.logDir + '/' + 'rejections.log'),
+      }));
+      */
+    //};
+
     Logger.instance = this;
     return this;
   }
