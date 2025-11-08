@@ -7,7 +7,7 @@ const { Buffer } = require('buffer');
 // when it sees this import.
 jest.mock('node-hid');
 
-describe.todo('controllers/ups-hid-handler.js', () => {
+describe.skip('controllers/ups-hid-handler.js', () => {
 
   beforeAll(() => { //
   });

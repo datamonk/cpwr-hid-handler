@@ -1,9 +1,14 @@
 {
   "config": {
+    "logToFile": false,
+    "logFilePath": "./logs/app.log",
+    "logToConsole": true,
+    "consoleLogLevel": "debug",
+    "fileLogLevel": "info",
+    "cacheTTLSeconds": 300,
     "vendorId": "0x0764",
     "productId": "0x0501",
     "devicePath": "/dev/usb/hiddev0",
-    "defaultLogLevel": "info",
     "keyOrder": [
       "ts",
       "path",
@@ -19,11 +24,6 @@
       "0x44",
       "0x45",
       "0x46"
-    ],
-    "app": {
-      "logLevel": "debug",
-      "logLevelConsole": "debug",
-      "logName": "cpwr-hid-handler"
-    }
+    ]
   }
 }

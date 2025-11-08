@@ -1,7 +1,7 @@
 const winston = require('winston');
 const { combine, timestamp, colorize, errors, printf } = winston.format;
 
-const cache = require('../services/cache-service.js');
+const cache = require('../src/services/cache-service.js');
 
 //const mkdirp = require('mkdirp');
 const { mkdirp } = require('mkdirp');

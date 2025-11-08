@@ -4,10 +4,8 @@ const col = require('yoctocolors');
 const EventEmitter = require('events');
 const ee = new EventEmitter();
 
-//const { Logger } = require('../../lib/logger.js');
-//const logger = new Logger(false); // Default boolean to enable debug logs
-
-const logger = require('../helpers/logger.js');
+const Logger = require('../services/logger-service.js');
+logger = new Logger({ level: 'debug' });
 
 const { splitBufferIntoChunks, JSONstringifyRaw, JSONstringifyHex, sortObjectElements } = require('../lib/etl.js');
 const { parseUsage } = require('../services/ups-hid-parser.js');

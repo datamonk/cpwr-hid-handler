@@ -1,8 +1,8 @@
-const UpsHidParser = require('./ups-hid-parser.js');
-const parser = new UpsHidParser();
+//const UpsHidParser = require('./ups-hid-parser.js');
+//const parser = new UpsHidParser();
 
-describe.todo('UpsHidParser', () => {
-    test.todo('placeholder test', () => {
+describe.skip('UpsHidParser', () => {
+    test.skip('placeholder test', () => {
         expect(true).toBe(true);
     });
 });

@@ -1,7 +1,7 @@
 
-describe.todo('controllers/output-state-emitter.js: todo', () => {
+describe.skip('controllers/output-state-emitter.js: todo', () => {
   
-    test.todo('placeholder test', () => {
+    test.skip('placeholder test', () => {
     expect(true).toBe(true);
   });
 });

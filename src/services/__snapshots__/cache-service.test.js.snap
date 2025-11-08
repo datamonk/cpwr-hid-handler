@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`CacheService(): with CLI override for config.logLevel should clear cache and restore from snapshot using helper: cache-file-before-clear 1`] = `
+"{
+  "foo": {
+    "bar": 42
+  }
+}"
+`;
+
+exports[`CacheService(): with CLI override for config.logLevel should set and persist a known value (snapshot): cache-file-after-set 1`] = `
+"{
+  "foo": {
+    "bar": 42
+  }
+}"
+`;

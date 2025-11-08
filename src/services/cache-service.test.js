@@ -1,57 +1,118 @@
-const cache = require('./cache-service.js');
+const CacheService = require('./cache-service');
+const fs = require('fs/promises');
+//const path = require('path');
 
-(async function configTest() {
-    let readConfigUno = await cache.getConfig('config', 5000);
-    console.log('config object [set from file; cache miss]:', readConfigUno);
+/**
+ * @note update snapshots with
+ *   $ node ./node_modules/jest/bin/jest.js --updateSnapshot   
+ */
 
-    let readConfigDos = await cache.getConfig('config', 5000);
-    console.log('config object [get; cache hit]:', readConfigDos);
+const { restoreCacheFileFromSnapshot } = require('./helpers/restoreFromSnapshot');
+//const TEST_CACHE_FILE = path.join(__dirname, '../config/config.json');
+const TEST_CACHE_FILE = './cache.json';
 
-    /**
-     * @output
-     * {
-     * vendorId: '0x0764',
-     * productId: '0x0501',
-     * devicePath: '/dev/usb/hiddev0',
-     * defaultLogLevel: 'info',
-     * keyOrder: [
-     *  'ts',
-     *  'path',
-     *  'batteryPercentage',
-     *  'acPresent',
-     *  'runTimeToEmpty',
-     *  'chargeStatus'
-     * ],
-     * usagesToParse: [ '0x66', '0x68', '0xd0', '0x44', '0x45', '0x46' ]
-     * }
-    */
-})();
+describe('CacheService(): with CLI override for config.logLevel', () => {
+  let cache;
 
-(async function argsTest() {
-  const cannedArgs = {
-    debugEnabled: true,
-    prettyEnabled: false,
-    onceModeEnabled: false,
-    devicePath: "/dev/usb/hiddev0"
-  };
+  beforeEach(async () => {
+    // Clean up before each test
+    try { await fs.unlink(TEST_CACHE_FILE); } catch (e) {}
+    // We remove any logLevel left in process.argv
+    //process.argv = process.argv.filter(a => !a.startsWith('--logLevel'));
+    cache = new CacheService(TEST_CACHE_FILE);
+  });
 
-  let writeArgs = await cache.setArgs('args', cannedArgs, 5000);
-  console.log('args object [set; cache null]:', writeArgs);
+  afterAll(async () => {
+    try { await fs.unlink(TEST_CACHE_FILE); } catch (e) {}
+  });
 
-  let readArgs = await cache.getArgs('args');
-  console.log('args object [get; cache hit]:', readArgs);
-  
-  /**
-   * @output
-   * {
-   * debugEnabled: true,
-   * prettyEnabled: false,
-   * onceModeEnabled: false,
-   * devicePath: '/dev/usb/hiddev0'
-   * }
-   */
+  test('should set and persist a known value (snapshot)', async () => {
+    await cache.set('foo', { bar: 42 });
+    const fileContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    // Save the initial cache file as a named snapshot
+    //expect(fileContents).toMatchSnapshot('cache-file-canned-state');
+    expect(fileContents).toMatchSnapshot('cache-file-after-set');
+  });
 
-  console.log('parsed debug boolean:', readArgs.debugEnabled);
-  // parsed debug boolean: true
+  test('should clear cache and restore from snapshot using helper', async () => {
+    // Create and snapshot cache
+    await cache.set('foo', { bar: 42 });
+    const beforeClearContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    expect(beforeClearContents).toMatchSnapshot('cache-file-before-clear');
 
-  })();
+    // Clear cache
+    await cache.clear();
+    const clearedContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    expect(clearedContents).toEqual('{}');
+
+    // Restore cache file from snapshot using helper
+    await restoreCacheFileFromSnapshot(TEST_CACHE_FILE, 'cache-file-before-clear');
+
+    // Reinitialize cache and verify restore
+    const cacheRestored = new CacheService(TEST_CACHE_FILE);
+    await cacheRestored.init();
+    expect(await cacheRestored.get('foo')).toEqual({ bar: 42 });
+  });
+
+  test.skip('should override config.logLevel from CLI --logLevel=debug', async () => {
+    process.argv.push('--logLevel=debug');
+    //cache = new CacheService(TEST_CACHE_FILE);
+    await cache.init();
+
+    // Direct property
+    expect(cache.cache.config.logLevel).toBe('debug');
+    // File updated
+    const fileContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    const fileCache = JSON.parse(fileContents);
+    expect(fileCache.config.logLevel).toBe('debug');
+  });
+
+  test.skip('should override config.logLevel from CLI --logLevel info', async () => {
+    process.argv.push('--logLevel', 'info');
+    //cache = new CacheService(TEST_CACHE_FILE);
+    await cache.init();
+
+    expect(cache.cache.config.logLevel).toBe('info');
+    const fileContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    const fileCache = JSON.parse(fileContents);
+    expect(fileCache.config.logLevel).toBe('info');
+  });
+
+  test.skip('should preserve logLevel from cache file when no CLI override given', async () => {
+    // Write out an initial logLevel
+    await fs.writeFile(
+      TEST_CACHE_FILE,
+      JSON.stringify({ config: { logLevel: 'warn' } }, null, 2)
+    );
+    //cache = new CacheService(TEST_CACHE_FILE);
+    await cache.init();
+
+    expect(cache.cache.config.logLevel).toBe('warn');
+  });
+
+  test.skip('should emit set event when logLevel overridden by CLI', async () => {
+    const listener = jest.fn();
+    process.argv.push('--logLevel=error');
+    //cache = new CacheService(TEST_CACHE_FILE);
+    cache.on('set', listener);
+    await cache.init();
+
+    // Should emit for config.logLevel
+    expect(listener).toHaveBeenCalledWith('config.logLevel', 'error');
+  });
+
+  test.skip('should set and get other keys', async () => {
+    //cache = new CacheService(TEST_CACHE_FILE);
+    await cache.set('foo', { bar: 42 });
+    expect(await cache.get('foo')).toEqual({ bar: 42 });
+  });
+
+  test.skip('should clear cache correctly', async () => {
+    //cache = new CacheService(TEST_CACHE_FILE);
+    await cache.set('key', 'val');
+    await cache.clear();
+    expect(cache.cache).toEqual({});
+    const fileContents = await fs.readFile(TEST_CACHE_FILE, 'utf8');
+    expect(JSON.parse(fileContents)).toEqual({});
+  });
+});

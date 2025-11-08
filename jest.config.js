@@ -40,7 +40,7 @@ const config = {
   },
   moduleNameMapper: {
     "^node-hid$": "<rootDir>/__mocks__/node-hid.js",
-    "^fs$": "<rootDir>/__mocks__/fs.js",
+    //"^fs$": "<rootDir>/__mocks__/fs.js",
     //"^yargs$": "<rootDir>/__mocks__/yargs.js",
   },
 };

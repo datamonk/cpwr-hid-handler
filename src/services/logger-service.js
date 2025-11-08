@@ -1,131 +1,125 @@
-//'use strict';
-
-// Modules
-const _ = require('lodash');
-const dayjs = require('dayjs');
-const mkdirp = require('mkdirp');
 const path = require('path');
-const serialize = require('winston/lib/winston/common').serialize;
-const util = require('util');
 const winston = require('winston');
+const { combine, timestamp, colorize, errors, printf, json } = winston.format;
 
-const config = require(__dirname + '/../config/config.js');
+const cache = require('./cache-service.js');
 
-// Constants
-const logLevels = {
-  '0': 'error',
-  '1': 'warn',
-  '2': 'info',
-  '3': 'verbose',
-  '4': 'debug',
-  '5': 'silly',
-};
-const logColors = {
-  error: 'bgRed',
-  warn: 'bgYellow',
-  info: 'bold',
-  verbose: 'gray',
-  debug: 'dim',
-  //debug: 'green',
-  silly: 'blue',
-  timestamp: 'magenta',
-  carryoptics: 'cyan',
-  app: 'green',
-};
-const userLevels = ['warn', 'error'];
-
-// Maxsize
-let fcw = 0;
-
-// Rewriters
-const keySanitizer = sanitizeKey => (level, msg, meta) => {
-  _.forEach(meta, (value, key) => {
-    if (sanitizeKey === key) meta[key] = '****';
-  });
-  return meta;
+const config = {
+  levels: {
+    error: 0,
+    warn: 1,
+    info: 2,
+    debug: 3,
+    trace: 4,
+  },
+  colors: {
+    error: 'red',
+    warn: 'yellow',
+    info: 'green',
+    debug: 'blue',
+    trace: 'grey'
+  }
 };
 
-module.exports = class Log extends winston.Logger {
+class Logger extends winston.Logger {
+  constructor(options = {}, cache = {}, logPaths = {}) {
+    // Default paths for .File transports
+    const {
+      appLogPath = path.join(__dirname, 'app.log'),
+      exceptionLogPath = path.join(__dirname, 'exceptions.log'),
+      rejectionLogPath = path.join(__dirname, 'rejections.log'),
+    } = logPaths;
+    const logLevel = options.level || 'info';
 
-  // using global configuration
-  constructor({logDir, logLevelConsole = config.logLevelConsole, logLevel = config.logLevel, logName = config.logName, componentName = 'none'} = {}) {
-  // static
-  //constructor({logDir, logLevelConsole = 'warn', logLevel = 'debug', logName = 'carryoptics', componentName = 'none'} = {}) {
+    winston.addColors(config.colors);
+    const transports = [
+      new winston.transports.Console({ // Console transport
+        level: logLevel,
+        format: combine(
+          colorize(),
+          errors({ stack: true }),
+          //timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+          timestamp(), // ISO8601 format
+          printf(({ level, message, timestamp }) =>
+            `[${timestamp}] ${level}: ${message}`
+          )
+        ),
+      }),
+      new winston.transports.File({ // File transport
+        filename: appLogPath,
+        level: logLevel,
+        format: combine(
+          timestamp(),
+          json()
+        ),
+      }),
+    ];
+    
+    const exceptionHandlers = [
+      new winston.transports.File({ // Exception handler
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: exceptionLogPath
+      }),
+    ];
+    const rejectionHandlers = [
+      new winston.transports.File({ // Rejection handler
+        maxSize: 500000,
+        maxFiles: 2,
+        filename: rejectionLogPath
+      }),
+    ];
 
-  // If loglevelconsole is numeric lets map it!
-  if (_.isInteger(logLevelConsole)) logLevelConsole = logLevels[logLevelConsole];
-
-  // The default console transport
-  const transports = [
-    new winston.transports.Console({
-      timestamp: () => dayjs().format('HH:mm:ss'),
-      //formatter: options => {
-      format: options => {
-        // Get da prefixes
-        const element = (logName === 'carryoptics') ? 'carryoptics' : logName;
-        const elementColor = (logName === 'carryoptics') ? 'carryoptics' : 'app';
-        // Set the leftmost colum width
-        fcw = _.max([fcw, _.size(element)]);
-        // Default output
-        const output = [
-          winston.config.colorize(elementColor, _.padEnd(element.toLowerCase(), fcw)),
-          winston.config.colorize('timestamp', options.timestamp()),
-          winston.config.colorize(options.level, options.level.toUpperCase()),
-          '==>',
-          util.format(options.message),
-          serialize(options.meta),
-        ];
-        // If this is a warning or error and we arent verbose then omit prefixes
-        if (_.includes(userLevels, options.level) && _.includes(userLevels, logLevelConsole)) {
-          return _.drop(output, 2).join(' ');
-        }
-        return output.join(' ');
-      },
-      //label: logName,
-      label: logName + ' => ' + componentName,
-      level: logLevelConsole,
-      colorize: true,
-    }),
-  ];
-
-  // If we have a log path then let's add in some file transports
-  if (logDir) {
-    // Ensure the log dir actually exists
-    mkdirp.sync(logDir);
-    // Add in our generic and error logs
-    transports.push(new winston.transports.File({
-      name: 'error-file',
-      label: logName,
-      level: 'warn',
-      maxSize: 500000,
-      maxFiles: 2,
-      filename: path.join(logDir, `${logName}-error.log`),
-    }));
-    transports.push(new winston.transports.File({
-      name: 'log-file',
-      label: logName,
+    super({ // Initialize Winston Logger with custom opts
+      ...options,
       level: logLevel,
-      maxSize: 500000,
-      maxFiles: 3,
-      filename: path.join(logDir, `${logName}.log`),
-    }));
-  };
-  
-  // Get the winston logger
-  super({transports: transports, exitOnError: true, colors: logColors});
-  //super({transports: transports, exitOnError: true});
+      transports,
+      exceptionHandlers,
+      rejectionHandlers,
+      exitOnError: false, // Don't exit on handled exceptions
+    });
 
-  // Extend with special carryoptics things
-  this.sanitizedKeys = ['auth', 'token', 'password', 'key', 'api_key', 'secret', 'machine_token'];
-  // Loop through our sanitizedKeys and add sanitation
-  _.forEach(this.sanitizedKeys, key => this.rewriters.push(keySanitizer(key)));
-
+    this.cache = cache;
+    this.defaultLevel = logLevel;
   };
 
-  // Method to help other things add sanitizations
-  alsoSanitize(key) {
-    this.sanitizedKeys.push(key);
-    this.rewriters.push(keySanitizer(key));
+  getCurrentLevel() {
+    const debug = this.cache['debug'];
+    return debug ? 'debug' : this.defaultLevel;
   };
-  
+
+  log(level, message, ...meta) {
+    const currentLevel = this.getCurrentLevel();
+    if (currentLevel === 'debug' && level !== 'debug') {
+      super.log('debug', `[OVERRIDE:${level}] ${message}`, ...meta);
+    } else {
+      super.log(level, message, ...meta);
+    }
+  };
+
+  debug(message, ...meta) { this.log('debug', message, ...meta); }
+  info(message, ...meta) { this.log('info', message, ...meta); }
+  warn(message, ...meta) { this.log('warn', message, ...meta); }
+  error(message, ...meta) { this.log('error', message, ...meta); }
+
+  setDebug(flag) { this.cache['debug'] = !!flag; }
 };
+
+module.exports = Logger;
+
+/**
+ * @usage
+ *   const CustomLogger = require('./CustomLogger');
+ *   const logger = new CustomLogger(
+ *    { level: 'info' },
+ *     {}, // cache
+ *     { appLogPath: './logs/app.log', exceptionLogPath: './logs/exceptions.log' } 
+ *   );
+ *
+ *    logger.info("Regular info message.");
+ *    logger.setDebug(true);
+ *    logger.warn("This will go to debug level due to debug override.");
+ *
+ *    // Uncaught exceptions or rejected promises will be logged in the exceptions.log file.
+ *    process.on('unhandledRejection', err => { throw err; });
+*/

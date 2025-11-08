@@ -1,4 +1,4 @@
-const processArgs = require('./args.js');
+const processArgs = require('../src/helpers/args.js');
 const { startLogger } = require('./logger.js');
 
 const args = ['--debug', '--pretty'];
